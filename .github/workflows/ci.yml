@@ -57,17 +57,15 @@ jobs:
       - name: Install dependencies and build
         run: |
           pnpm install
+          pnpm build
           pnpm prepack
           pnpm link --global
-          rm -rf node_modules/
-          rm pnpm-lock.yaml
-          pnpm config set auto-install-peers false --location project
-          pnpm install
 
       - name: Install dependencies for payload
         run: |
           cd payload
           pnpm install
+          cd test
           pnpm link --global payload-firestore-adapter 
 
       - name: Run sqlite tests
