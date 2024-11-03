@@ -1,0 +1,73 @@
+name: 'CI'
+
+on:
+  push:
+    branches: 
+      - '*'
+  pull_request:
+
+jobs:
+  test:
+    runs-on: 'ubuntu-latest'
+
+    services:
+      firestore:
+        image: preisvergleich/gcloud-firestore:889
+        #
+        ports:
+          - 8080:8086
+          
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v4'
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: '9.7.1'
+          run_install: false
+
+      - name: Checkout payload
+        uses: actions/checkout@v4
+        with:
+          repository: payloadcms/payload
+          ref: beta
+          path: payload
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.12.2
+          cache: 'pnpm'
+          cache-dependency-path: 'payload/pnpm-lock.yaml'
+
+      - name: 'Show pnpm'
+        run: |2-
+          pnpm --version
+          node --version
+
+      - name: "Let's see"
+        run: |2-
+          ls -al
+          ls -al payload
+
+      - name: See if Emulator runs
+        run: |
+          curl -v  http://localhost:8080/
+
+      - name: Install dependencies for payload
+        run: |
+          cd payload
+          pnpm install
+
+      - name: Run sqlite tests
+        run: |
+          cd payload
+          pnpm test:int:sqlite test/sort/int.spec.ts
+
+      - name: Run firestore tests
+        run: |
+          cd payload
+          cp ../.github/files/jest.setup.js test/jest.setup.js
+          pnpm link ../ --save-dev
+          node_modules/.bin/cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true node_modules/.bin/jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand test/sort/int.spec.ts
