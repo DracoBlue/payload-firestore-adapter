@@ -64,7 +64,7 @@ jobs:
         run: |
           cd payload
           pnpm install
-          pnpm install payload-firestore-adapter@3.0.0-beta.123 --save-dev -w .
+          pnpm link --global payload-firestore-adapter -w .
 
       - name: Run sqlite tests
         run: |
@@ -75,5 +75,4 @@ jobs:
         run: |
           cd payload
           cp ../.github/files/jest.setup.js test/jest.setup.js
-          pnpm link ../ --save-dev
           node_modules/.bin/cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true node_modules/.bin/jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand test/sort/int.spec.ts
