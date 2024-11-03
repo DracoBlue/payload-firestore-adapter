@@ -65,7 +65,7 @@ jobs:
         run: |
           cd payload
           pnpm install
-          pnpm install payload-firestore-database-adapter@3.0.0-beta.123 --save-dev
+          pnpm install payload-firestore-database-adapter@3.0.0-beta.123 --save-dev -w .
 
       - name: Run sqlite tests
         run: |
