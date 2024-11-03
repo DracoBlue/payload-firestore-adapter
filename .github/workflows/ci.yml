@@ -70,6 +70,7 @@ jobs:
           pnpm install
           cd test
           pnpm link --global payload-firestore-adapter
+          pnpm list
 
       - name: Run sqlite tests
         run: |
