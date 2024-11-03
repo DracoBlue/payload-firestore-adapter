@@ -40,6 +40,7 @@ jobs:
         run: |
           gcloud emulators firestore start --host-port=0.0.0.0:8080 &
           FIRESTORE_EMULATOR_PID=$!
+          echo "FIRESTORE_EMULATOR_PID=$FIRESTORE_EMULATOR_PID" >> $GITHUB_ENV
       - name: Slepp
         run: |
           sleep 10
