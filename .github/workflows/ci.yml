@@ -62,15 +62,18 @@ jobs:
           pnpm install
           pnpm build
           pnpm prepack
-          pnpm link --global
 
       - name: Install dependencies for payload
         run: |
           cd payload
           pnpm install
+
+      - name: Install dependency to plugin
+        run: |
+          cd payload
           cd test
-          pnpm link --global payload-firestore-adapter
-          pnpm list
+          pnpm add file://../../
+
 
       - name: Run sqlite tests
         run: |
