@@ -27,18 +27,30 @@ jobs:
           version: '9.7.1'
           run_install: false
 
+      - name: See if Emulator runs
+        run: |
+          curl -v  http://localhost:8080/
+      
+      - name: Checkout payload
+        uses: actions/checkout@v4
+        with:
+          repository: payloadcms/payload
+          ref: beta
+          path: payload
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.12.2
-          # cache: 'pnpm'
-
-      - name: See if Emulator runs
-        run: |
-          curl -v  http://localhost:8080/
+          cache: 'pnpm'
+          cache-dependency-path: 'payload/pnpm-lock.yaml'
           
       - name: 'Show pnpm'
         run: |2-
           pnpm --version
           node --version
 
+      - name: "Let's see"
+        run: |2-
+          ls -al
+          ls -al payload
