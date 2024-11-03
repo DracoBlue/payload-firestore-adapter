@@ -55,3 +55,7 @@ jobs:
         run: |
           curl -v  http://localhost:8080/
 
+      - name: Install dependencies for payload
+        run: |
+          cd payload
+          pnpm install
