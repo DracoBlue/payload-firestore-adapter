@@ -14,7 +14,7 @@ process.env.PAYLOAD_CI_DEPENDENCY_CHECKER = 'true'
 const dbAdapter = process.env.PAYLOAD_DATABASE || 'mongodb'
 
 allDatabaseAdapters['firestore'] = `
-  import { firestoreAdapter } from 'payload-firestore-database-adapter'
+  import { firestoreAdapter } from 'payload-firestore-adapter'
 
   export const databaseAdapter = firestoreAdapter({
 

@@ -1,11 +1,11 @@
 {
-  "name": "payload-firestore-database-adapter",
+  "name": "payload-firestore-adapter",
   "version": "3.0.0-beta.123",
   "description": "An unofficial firestore database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dracoblue/payload-firestore-database-adapter.git",
+    "url": "https://github.com/dracoblue/payload-firestore-adapter.git",
     "directory": "."
   },
   "license": "MIT",
