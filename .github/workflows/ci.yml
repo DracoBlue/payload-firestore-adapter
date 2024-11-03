@@ -5,6 +5,9 @@ on:
     branches: 
       - '*'
 
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
 jobs:
   test:
     runs-on: 'ubuntu-latest'
@@ -66,7 +69,7 @@ jobs:
           cd payload
           pnpm install
           cd test
-          pnpm link --global payload-firestore-adapter 
+          pnpm link --global payload-firestore-adapter  --workspace
 
       - name: Run sqlite tests
         run: |
