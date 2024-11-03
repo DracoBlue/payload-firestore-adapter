@@ -62,4 +62,5 @@ jobs:
 
       - name: Run sqlite tests
         run: |
+          cd payload
           pnpm test:int:sqlite test/sort/int.spec.ts
