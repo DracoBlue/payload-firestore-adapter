@@ -59,3 +59,7 @@ jobs:
         run: |
           cd payload
           pnpm install
+
+      - name: Run sqlite tests
+        run: |
+          pnpm test:int:sqlite test/sort/int.spec.ts
