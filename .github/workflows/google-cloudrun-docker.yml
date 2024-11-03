@@ -1,0 +1,43 @@
+name: 'CI'
+
+on:
+  push:
+    branches: 
+      - '*'
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v4'
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: '9.7.1'
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.12.2
+          cache: 'pnpm'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 490.0.0'
+          install_components: 'cloud-firestore-emulator'
+      
+      - name: 'Show Gcloud'
+        run: |2-
+          gcloud info
+
+      - name: 'Show pnpm'
+        run: |2-
+          pnpm --version
+          node --version
+
