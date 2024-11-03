@@ -55,10 +55,17 @@ jobs:
         run: |
           curl -v  http://localhost:8080/
 
+      - name: Install dependencies and build
+        run: |
+          pnpm install
+          pnpm build
+          pnpm link --global
+
       - name: Install dependencies for payload
         run: |
           cd payload
           pnpm install
+          pnpm install payload-firestore-database-adapter@3.0.0-beta.123 --save-dev
 
       - name: Run sqlite tests
         run: |
