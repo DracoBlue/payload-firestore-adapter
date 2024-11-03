@@ -10,6 +10,13 @@ jobs:
   test:
     runs-on: 'ubuntu-latest'
 
+    services:
+      firestore:
+        image: preisvergleich/gcloud-firestore:889
+        #
+        ports:
+          - 8080:8086
+          
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v4'
@@ -26,24 +33,10 @@ jobs:
           node-version: 20.12.2
           # cache: 'pnpm'
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
-        with:
-          version: '>= 490.0.0'
-          install_components: 'cloud-firestore-emulator'
-      
-      - name: 'Show Gcloud'
-        run: |2-
-          gcloud info
-
-      - name: Run Emulator in Background
-        run: |
-          gcloud emulators firestore start --host-port=0.0.0.0:8080 &
-          FIRESTORE_EMULATOR_PID=$!
-          echo "FIRESTORE_EMULATOR_PID=$FIRESTORE_EMULATOR_PID" >> $GITHUB_ENV
       - name: See if Emulator runs
         run: |
           curl -v  http://localhost:8080/
+          
       - name: 'Show pnpm'
         run: |2-
           pnpm --version
