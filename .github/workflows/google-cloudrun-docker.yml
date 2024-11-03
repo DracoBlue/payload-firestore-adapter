@@ -41,13 +41,9 @@ jobs:
           gcloud emulators firestore start --host-port=0.0.0.0:8080 &
           FIRESTORE_EMULATOR_PID=$!
           echo "FIRESTORE_EMULATOR_PID=$FIRESTORE_EMULATOR_PID" >> $GITHUB_ENV
-      - name: Slepp
+      - name: See if Emulator runs
         run: |
-          sleep 10
-      - name: Stop Emulator
-        run: |
-          kill $FIRESTORE_EMULATOR_PID
-          wait $FIRESTORE_EMULATOR_PID
+          curl -v  http://localhost:8080/
       - name: 'Show pnpm'
         run: |2-
           pnpm --version
