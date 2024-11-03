@@ -68,8 +68,7 @@ jobs:
         run: |
           cd payload
           pnpm install
-          cd test
-          pnpm link --global payload-firestore-adapter  --workspace
+          pnpm link --global payload-firestore-adapter --workspace-root
 
       - name: Run sqlite tests
         run: |
