@@ -31,7 +31,6 @@ jobs:
           - fields-relationship
           - globals
           - graphql-schema-gen
-          - helpers
           - hooks
           - joins
           - live-preview
