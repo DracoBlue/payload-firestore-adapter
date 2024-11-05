@@ -128,12 +128,7 @@ jobs:
           cd payload
           pnpm install
 
-      - name: Run sqlite tests ${{ matrix.suite }}
-        run: |
-          cd payload
-          pnpm test:int:sqlite test/${{ matrix.environment }}/int.spec.ts
-
-      - name: Run firestore tests ${{ matrix.suite }}
+      - name: Run tests ${{ matrix.suite }}
         env:
           CI: true
         run: |
