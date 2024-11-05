@@ -12,44 +12,6 @@ jobs:
   test:
     runs-on: 'ubuntu-latest'
 
-    strategy:
-      fail-fast: false
-      matrix:
-        suite:
-          - _community
-          - access-control
-          - admin-root
-          - array-update
-          - auth
-          - collections-graphql
-          - collections-rest
-          - config
-          - custom-graphql
-          - database
-          - dataloader
-          - fields
-          - fields-relationship
-          - globals
-          - hooks
-          - joins
-          - live-preview
-          - loader
-          - localization
-          - login-with-username
-          - payload-cloud
-          - plugin-cloud-storage
-          - plugin-form-builder
-          - plugin-nested-docs
-          - plugin-search
-          - plugin-seo
-          - plugins
-          - queues
-          - relationships
-          - select
-          - sort
-          - uploads
-          - versions
-
     services:
       firestore:
         image: preisvergleich/gcloud-firestore:889
@@ -106,11 +68,16 @@ jobs:
           cd payload
           pnpm install
 
-      - name: Run tests ${{ matrix.suite }}
+      - name: Run tests
         env:
           CI: true
         continue-on-error: true
         run: |
           cd payload
+          pnpm install --save-dev jest-ctrf-json-reporter -w
           cp ../.github/files/jest.setup.js test/jest.setup.js
-          node_modules/.bin/cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true node_modules/.bin/jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand test/${{ matrix.suite }}/int.spec.ts
+          node_modules/.bin/cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true node_modules/.bin/jest --forceExit --detectOpenHandles --reporters="default" --reporters="summary" --reporters="jest-ctrf-json-reporter" --config=test/jest.config.js --runInBand test/
+
+      - name: Run CTRF annotations
+        run: npx github-actions-ctrf ctrf/ctrf-report.json
+        if: always()
