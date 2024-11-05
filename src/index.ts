@@ -254,13 +254,29 @@ export function firestoreAdapter({
         console.log('trying to find', collectionName, { joins, projection, versions, skip, locale })
         const colRef = collection(this.firestore as Firestore, collectionName)
 
-        let firestoreQuery = query(colRef)
+        let firestoreQuery = query(colRef);
+
+        if (!sort) {
+          console.log('no sort given');
+          let collectionConfig = payload.config.collections.find((collectionConfig) => collectionConfig.slug === collectionName);
+          if (collectionConfig?.defaultSort) {
+            console.log('found defaultSort', collectionConfig);
+            sort = collectionConfig?.defaultSort;
+          }
+        }
 
         if (payloadWhereQuery) {
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             collectionName,
             payloadWhereQuery,
+            sort,
+          )
+        } else {
+          firestoreQuery = convertPayloadToFirestoreQuery(
+            this.firestore as Firestore,
+            collectionName,
+            null,
             sort,
           )
         }
@@ -352,11 +368,27 @@ export function firestoreAdapter({
 
         let firestoreQuery = query(colRef)
 
+        if (!sort) {
+          console.log('no sort given');
+          let collectionConfig = payload.config.collections.find((collectionConfig) => collectionConfig.slug === nonVersionCollectionName);
+          if (collectionConfig?.defaultSort) {
+            console.log('found defaultSort', collectionConfig);
+            sort = collectionConfig?.defaultSort;
+          }
+        }
+
         if (payloadWhereQuery) {
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             versionCollectionName,
             payloadWhereQuery,
+            sort,
+          )
+        } else {
+          firestoreQuery = convertPayloadToFirestoreQuery(
+            this.firestore as Firestore,
+            versionCollectionName,
+            null,
             sort,
           )
         }
@@ -428,11 +460,27 @@ export function firestoreAdapter({
 
         let firestoreQuery = query(colRef)
 
+        if (!sort) {
+          console.log('no sort given');
+          let collectionConfig = payload.config.collections.find((collectionConfig) => collectionConfig.slug === nonVersionCollectionName);
+          if (collectionConfig?.defaultSort) {
+            console.log('found defaultSort', collectionConfig);
+            sort = collectionConfig?.defaultSort;
+          }
+        }
+
         if (payloadWhereQuery) {
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             versionCollectionName,
             payloadWhereQuery,
+            sort,
+          )
+        } else {
+          firestoreQuery = convertPayloadToFirestoreQuery(
+            this.firestore as Firestore,
+            versionCollectionName,
+            null,
             sort,
           )
         }

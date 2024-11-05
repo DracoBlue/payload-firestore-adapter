@@ -76,25 +76,29 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
     return constraints;
   };
 
-  const firestoreConstraints = processQuery(payloadQuery);
-  const compositeFilter = and(...firestoreConstraints);
 
 
-  let firestoreQuery = query(collection(firestore, collectionName), compositeFilter);
+  let firestoreQuery = query(collection(firestore, collectionName))
+  
+  if (payloadQuery) {
+    const firestoreConstraints = processQuery(payloadQuery);
+    const compositeFilter = and(...firestoreConstraints);
+    firestoreQuery = query(collection(firestore, collectionName), compositeFilter);
+  }
 
-  if (payloadSort) {
+  if (!payloadSort) {
+    // FIXME: depend on the fact if updatedAt exists (otherwise use -id)
+    payloadSort = '-id';
+  }
 
-    if (!Array.isArray(payloadSort)) {
-      payloadSort = [payloadSort];
-    }
+  if (!Array.isArray(payloadSort)) {
+    payloadSort = [payloadSort];
+  }
 
-    for (let payloadSortItem of payloadSort) {
-      let payloadSortField = payloadSortItem.substr(0, 1) === '-' ? payloadSortItem.substr(1) : payloadSortItem;
-      let payloadSortDirection : OrderByDirection = payloadSortItem.startsWith('-') ? 'desc' : 'asc';
-      firestoreQuery = query(firestoreQuery, orderBy(payloadSortField, payloadSortDirection));
-    }
-  } else {
-    // FIXME: add handling for (if we don't have -updatedAt) and -id
+  for (let payloadSortItem of payloadSort) {
+    let payloadSortField = payloadSortItem.substr(0, 1) === '-' ? payloadSortItem.substr(1) : payloadSortItem;
+    let payloadSortDirection : OrderByDirection = payloadSortItem.startsWith('-') ? 'desc' : 'asc';
+    firestoreQuery = query(firestoreQuery, orderBy(payloadSortField, payloadSortDirection));
   }
 
   return firestoreQuery;
