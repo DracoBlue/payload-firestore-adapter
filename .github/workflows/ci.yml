@@ -18,7 +18,6 @@ jobs:
           - _community
           - access-control
           - admin-root
-          - app
           - array-update
           - auth
           - collections-graphql
@@ -41,7 +40,6 @@ jobs:
           - live-preview
           - loader
           - localization
-          - localization-rtl
           - login-with-username
           - migrations-cli
           - nested-fields
