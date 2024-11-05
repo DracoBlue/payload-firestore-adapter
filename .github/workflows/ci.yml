@@ -82,8 +82,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ctrf-report
-          path: ctrf/ctrf-report.json
+          path: payload/ctrf/ctrf-report.json
           
       - name: Run CTRF annotations
-        run: npx github-actions-ctrf ctrf/ctrf-report.json
+        run: npx github-actions-ctrf payload/ctrf/ctrf-report.json
         if: always()
