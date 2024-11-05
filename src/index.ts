@@ -80,7 +80,7 @@ export function firestoreAdapter({
           delete data.document
         }
         const docRef = doc(colRef, '/' + data.id)
-        await setDoc(docRef, data)
+        await setDoc(docRef, JSON.parse(JSON.stringify(data)))
         return { id: docRef.id, ...data }
       },
 
@@ -136,7 +136,7 @@ export function firestoreAdapter({
         }
         const docRef = doc(colRef, '/' + data.id)
         console.log('creating version at', collectionSlug + this.versionsSuffix, data)
-        await setDoc(docRef, data)
+        await setDoc(docRef, JSON.parse(JSON.stringify(data)))
 
         let previousLatestVersionDocs = await getDocs(
           query(query(colRef), and(where('parent', '==', parent), where('latest', '==', true))),
@@ -528,7 +528,7 @@ export function firestoreAdapter({
         const docRef = doc(colRef, '/' + id)
         // FIXME: do not ignore where!
         const updateData: Partial<any> = { ...data }
-        await updateDoc(docRef, updateData)
+        await updateDoc(docRef, JSON.parse(JSON.stringify(updateData)))
         return { id: docRef.id, ...data }
       },
       updateVersion<T extends TypeWithID = TypeWithID>(
@@ -574,7 +574,7 @@ export function firestoreAdapter({
         //data.createdAt = data.createdAt || new Date().toISOString()
         //data.updatedAt = data.updatedAt || data.createdAt
         const docRef = doc(colRef, '/' + payloadGlobalName)
-        await setDoc(docRef, data)
+        await setDoc(docRef, JSON.parse(JSON.stringify(data)))
         return { id: docRef.id, ...data }
       },
       findGlobal: async function <T extends Record<string, unknown> = any>({
@@ -649,11 +649,14 @@ export function firestoreAdapter({
             appId: process.env.FIRESTORE_APP_ID,
           });
         if (this.firestore) {
+          console.log('terminate firestore');
           await terminate(this.firestore);
         }
+        console.log('connecting firestore');
         this.firestore = getFirestore(app)
         if (process.env.FIRESTORE_EMULATOR_HOST) {
-          let [host, port] = process.env.FIRESTORE_EMULATOR_HOST.split(':')
+          let [host, port] = process.env.FIRESTORE_EMULATOR_HOST.split(':');
+          console.log('use firestore emulator');
           connectFirestoreEmulator(this.firestore, host, parseInt(port, 10))
         }
       },
@@ -695,6 +698,25 @@ export function firestoreAdapter({
           locale,
           where: payloadWhereQuery,
         })
+      },
+
+      async dropDatabase({adapter}: {adapter: any}): Promise<void> {
+        console.log('starting to dropDatabase database');
+        for (let collectionConfig of (payload.config.collections || [])) {
+          let collectionDocs = await getDocs(collection(this.firestore as Firestore, collectionConfig.slug));
+          for (let doc of collectionDocs.docs) {
+            console.log('Deleting doc id:', doc.id, 'of', collectionConfig.slug);
+            await deleteDoc(doc.ref);
+          }
+        }
+        for (let globalConfig of (payload.config.globals || [])) {
+          let globalDocs = await getDocs(collection(this.firestore as Firestore, globalConfig.slug));
+          for (let doc of globalDocs.docs) {
+            console.log('Deleting doc id:', doc.id, 'of', globalConfig.slug);
+            await deleteDoc(doc.ref);
+          }
+        }
+        console.log('finished to dropDatabase database');
       },
 
       init: async function (): Promise<void> {
