@@ -29,6 +29,7 @@ import {
   doc,
   Firestore,
   setDoc,
+  terminate,
   getFirestore,
   connectFirestoreEmulator,
   query,
@@ -639,7 +640,6 @@ export function firestoreAdapter({
         })
       },
       connect: async function (): Promise<void> {
-        if (!this.firestore) {
           const app = initializeApp({
             apiKey: process.env.FIRESTORE_API_KEY,
             authDomain: process.env.FIRESTORE_AUTH_DOMAIN,
@@ -647,14 +647,14 @@ export function firestoreAdapter({
             storageBucket: process.env.FIRESTORE_STORAGE_BUCKET,
             messagingSenderId: process.env.FIRESTORE_MESSAGING_SENDER_ID,
             appId: process.env.FIRESTORE_APP_ID,
-          })
-          this.firestore = getFirestore(app)
-          if (process.env.FIRESTORE_EMULATOR_HOST) {
-            let [host, port] = process.env.FIRESTORE_EMULATOR_HOST.split(':')
-            connectFirestoreEmulator(this.firestore, host, parseInt(port, 10))
-          }
-        } else {
-          // FIXME: handle hot reload
+          });
+        if (this.firestore) {
+          await terminate(this.firestore);
+        }
+        this.firestore = getFirestore(app)
+        if (process.env.FIRESTORE_EMULATOR_HOST) {
+          let [host, port] = process.env.FIRESTORE_EMULATOR_HOST.split(':')
+          connectFirestoreEmulator(this.firestore, host, parseInt(port, 10))
         }
       },
       beginTransaction: async function (
