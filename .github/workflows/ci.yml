@@ -14,6 +14,7 @@ jobs:
 
     strategy:
       matrix:
+        fail-fast: false
         suite:
           - _community
           - access-control
