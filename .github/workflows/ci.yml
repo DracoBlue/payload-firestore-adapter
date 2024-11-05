@@ -26,7 +26,6 @@ jobs:
           - custom-graphql
           - database
           - dataloader
-          - field-perf
           - fields
           - fields-relationship
           - globals
