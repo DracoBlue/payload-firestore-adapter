@@ -36,7 +36,6 @@ jobs:
           - loader
           - localization
           - login-with-username
-          - nested-fields
           - payload-cloud
           - plugin-cloud-storage
           - plugin-form-builder
