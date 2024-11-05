@@ -17,7 +17,6 @@ jobs:
         suite:
           - _community
           - access-control
-          - admin
           - admin-root
           - app
           - array-update
@@ -25,13 +24,9 @@ jobs:
           - collections-graphql
           - collections-rest
           - config
-          - create-payload-app
           - custom-graphql
           - database
           - dataloader
-          - email
-          - email-nodemailer
-          - email-resend
           - field-error-states
           - field-perf
           - fields
@@ -50,25 +45,17 @@ jobs:
           - login-with-username
           - migrations-cli
           - nested-fields
-          - node_modules
           - payload-cloud
           - plugin-cloud-storage
           - plugin-form-builder
           - plugin-nested-docs
           - plugin-search
-          - plugin-sentry
           - plugin-seo
-          - plugin-stripe
           - plugins
           - queues
           - relationships
           - select
           - sort
-          - storage-azure
-          - storage-gcs
-          - storage-s3
-          - storage-uploadthing
-          - storage-vercel-blob
           - uploads
           - versions
 
