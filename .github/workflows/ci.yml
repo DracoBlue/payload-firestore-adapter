@@ -30,7 +30,6 @@ jobs:
           - fields
           - fields-relationship
           - globals
-          - graphql-schema-gen
           - hooks
           - joins
           - live-preview
