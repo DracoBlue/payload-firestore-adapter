@@ -1,5 +1,12 @@
 import type { Payload } from 'payload'
 
+export const uploadsDirCache: {
+  [key: string]: {
+    cacheDir: string
+    originalDir: string
+  }[]
+} = {}
+
 export const dbSnapshot = {}
 
 export async function createSnapshot(
