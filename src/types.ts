@@ -1,5 +1,5 @@
 
-import { BaseDatabaseAdapter } from 'payload'
+import type { BaseDatabaseAdapter } from 'payload'
 
 import {
     Firestore,

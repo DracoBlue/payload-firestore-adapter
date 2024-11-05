@@ -23,7 +23,7 @@ import type {
   Where,
 } from 'payload'
 
-import { BaseDatabaseAdapter, CountArgs, createDatabaseAdapter } from 'payload'
+import type { CountArgs } from 'payload'
 import {
   collection,
   doc,
@@ -45,7 +45,6 @@ import {
 import { initializeApp } from 'firebase/app'
 import { convertPayloadToFirestoreQuery, calculatePageResultStatistics } from './firestoreUtils.js'
 import { generateQueryJson } from './firestoreQueryJsonConverter.js'
-import { UpsertArgs } from 'node_modules/payload/dist/database/types.js'
 import { FirestoreAdapter } from './types.js'
 
 export function firestoreAdapter({
@@ -56,9 +55,9 @@ export function firestoreAdapter({
   versionsSuffix?: string
 }) {
   function adapter({ payload }: { payload: any }) {
-    return createDatabaseAdapter<FirestoreAdapter>({
+    return {
       name: 'firestore',
-      packageName: 'payloadcms-firestore-storage-adapter',
+      packageName: 'payload-firestore-adapter',
       sessions: {},
       payload,
       defaultIDType,
@@ -687,7 +686,7 @@ export function firestoreAdapter({
         req,
         joins,
         locale,
-      }: UpsertArgs): Promise<Document> {
+      }: any): Promise<Document> {
         return this.updateOne({
           collection: payloadCollectionName,
           data,
@@ -701,7 +700,7 @@ export function firestoreAdapter({
       init: async function (): Promise<void> {
         console.error('Function init not implemented.')
       },
-    })
+    };
   }
 
   return {

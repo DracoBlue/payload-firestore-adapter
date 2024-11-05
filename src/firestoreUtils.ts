@@ -1,5 +1,5 @@
 import { collection, query, where, or, Firestore, QueryCompositeFilterConstraint, and, QueryFilterConstraint, orderBy, OrderByDirection } from 'firebase/firestore';
-import { Sort } from 'payload';
+import type { Sort } from 'payload';
 
 
 /**
