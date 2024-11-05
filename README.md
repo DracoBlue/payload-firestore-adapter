@@ -8,6 +8,7 @@ This is an unofficial and completely experimental and not at all finished firest
 - [ ] setup github actions for integration testing with payload beta branch
 - [ ] implement features as rough proof of concept
 - [ ] implement features to be valid for all int.spec.ts tests on payload 3.0
+- [ ] add migrations handling
 - [ ] setup github actions for npm releases
 
 ## License

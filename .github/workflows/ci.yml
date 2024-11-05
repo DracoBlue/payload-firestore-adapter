@@ -12,6 +12,66 @@ jobs:
   test:
     runs-on: 'ubuntu-latest'
 
+    strategy:
+      matrix:
+        suite:
+          - _community
+          - access-control
+          - admin
+          - admin-root
+          - app
+          - array-update
+          - auth
+          - collections-graphql
+          - collections-rest
+          - config
+          - create-payload-app
+          - custom-graphql
+          - database
+          - dataloader
+          - email
+          - email-nodemailer
+          - email-resend
+          - field-error-states
+          - field-perf
+          - fields
+          - fields-relationship
+          - globals
+          - graphql-schema-gen
+          - helpers
+          - hooks
+          - i18n
+          - import-test
+          - joins
+          - live-preview
+          - loader
+          - localization
+          - localization-rtl
+          - login-with-username
+          - migrations-cli
+          - nested-fields
+          - node_modules
+          - payload-cloud
+          - plugin-cloud-storage
+          - plugin-form-builder
+          - plugin-nested-docs
+          - plugin-search
+          - plugin-sentry
+          - plugin-seo
+          - plugin-stripe
+          - plugins
+          - queues
+          - relationships
+          - select
+          - sort
+          - storage-azure
+          - storage-gcs
+          - storage-s3
+          - storage-uploadthing
+          - storage-vercel-blob
+          - uploads
+          - versions
+
     services:
       firestore:
         image: preisvergleich/gcloud-firestore:889
@@ -68,13 +128,15 @@ jobs:
           cd payload
           pnpm install
 
-      - name: Run sqlite tests
+      - name: Run sqlite tests ${{ matrix.suite }}
         run: |
           cd payload
-          pnpm test:int:sqlite test/sort/int.spec.ts
+          pnpm test:int:sqlite test/${{ matrix.environment }}/int.spec.ts
 
-      - name: Run firestore tests
+      - name: Run firestore tests ${{ matrix.suite }}
+        env:
+          CI: true
         run: |
           cd payload
           cp ../.github/files/jest.setup.js test/jest.setup.js
-          node_modules/.bin/cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true node_modules/.bin/jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand test/sort/int.spec.ts
+          node_modules/.bin/cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true node_modules/.bin/jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand test/${{ matrix.environment }}/int.spec.ts
