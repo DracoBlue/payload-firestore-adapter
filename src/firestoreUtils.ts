@@ -53,7 +53,12 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
             constraints.push(where(key, '!=', condition['not_equal']));
           }
           if (condition.hasOwnProperty('in')) {
-            constraints.push(where(key, 'in', condition['in']));
+            if (condition['in'].length) {
+              constraints.push(where(key, 'in', condition['in']));
+            } else {
+              /* this makes 0 results ensured, because in is empty */
+              constraints.push(where(key, '==', null));
+            }
           }
           if (condition.hasOwnProperty('not_in')) {
             constraints.push(where(key, 'not-in', condition['not_in']));
