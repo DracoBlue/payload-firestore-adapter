@@ -30,17 +30,19 @@
     "mock.js"
   ],
   "packageManager": "pnpm@9.7.1",
+  
   "scripts": {
-    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
+    "build": "tsc --project tsconfig.json",
+    "build:all": "pnpm build && pnpm -C dev build",
+    "build:app": "pnpm -C dev build",
+    "clean": "rimraf {dist,*.tsbuildinfo,package}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
+    "dev": "pnpm -C dev dev",
     "test": "NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=jest.config.js --runInBand",
-    "dev": "PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example-firestore-dev pnpm -C dev dev",
+    "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build --filter=./"
+    "prepack": "pnpm prepublishOnly",
+    "prepublishOnly": "pnpm clean && pnpm build && pnpm copyfiles"
   },
   "dependencies": {
     "console-table-printer": "2.11.2",
