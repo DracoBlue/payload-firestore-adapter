@@ -55,7 +55,7 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: ctrf-report
+          name: unit-test-ctrf-report
           path: ctrf/ctrf-report.json
           
       - name: Run CTRF annotations
@@ -135,7 +135,7 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: ctrf-report
+          name: payload-int-test-ctrf-report
           path: payload/ctrf/ctrf-report.json
           
       - name: Run CTRF annotations
