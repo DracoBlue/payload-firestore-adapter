@@ -1,3 +1,6 @@
 /node_modules
 /dist
 /tsconfig.tsbuildinfo
+/.turbo
+/dev/node_modules
+/dev/.next

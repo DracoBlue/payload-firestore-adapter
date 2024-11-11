@@ -36,6 +36,7 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "lint": "eslint .",
+    "dev": "PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example-firestore-dev pnpm -C dev dev",
     "lint:fix": "eslint . --fix",
     "prepack": "pnpm clean && pnpm turbo build",
     "prepublishOnly": "pnpm clean && pnpm turbo build --filter=./"
