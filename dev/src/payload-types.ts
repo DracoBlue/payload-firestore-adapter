@@ -152,6 +152,7 @@ export interface Book {
   author: string;
   title: string;
   publisher: string;
+  tags?: string[] | null;
   topics?: (string | Topic)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -289,6 +290,7 @@ export interface BooksSelect<T extends boolean = true> {
   author?: T;
   title?: T;
   publisher?: T;
+  tags?: T;
   topics?: T;
   updatedAt?: T;
   createdAt?: T;

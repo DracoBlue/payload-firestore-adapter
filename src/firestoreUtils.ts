@@ -54,7 +54,8 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
           }
           if (condition.hasOwnProperty('in')) {
             if (condition['in'].length) {
-              constraints.push(where(key, 'in', condition['in']));
+              // TODO: if the field hasMany -> we need array-contains-any. But any means it does not matter what matches.
+              constraints.push(where(key, 'array-contains-any', condition['in']));
             } else {
               /* this makes 0 results ensured, because in is empty */
               constraints.push(where(key, '==', null));

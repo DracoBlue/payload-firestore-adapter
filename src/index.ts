@@ -294,6 +294,8 @@ export function firestoreAdapter({
           }
         }
 
+        console.log(generateQueryJson(firestoreQuery));
+
         let docs = await getDocs(firestoreQuery)
         let dataItems = []
 
@@ -310,7 +312,7 @@ export function firestoreAdapter({
             page: page || 1,
             pagination: pagination || false,
           })
-        console.log('fetched ', collectionName, 'data', dataItems)
+        console.log('fetched', collectionName, 'data', dataItems)
 
         return {
           docs: dataItems,

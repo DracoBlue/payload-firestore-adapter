@@ -98,6 +98,11 @@ export default buildConfig({
           type: 'text',
         },
         {
+          name: 'tags',
+          type: 'text',
+          hasMany: true,
+        },
+        {
           name: 'topics',
           admin: {
             position: 'sidebar',

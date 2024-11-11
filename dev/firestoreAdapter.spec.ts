@@ -220,4 +220,121 @@ describe('firestore adapter tests', () => {
     console.log('notLatestFindGlobalVersions.length', notLatestFindGlobalVersions.length);
   
   })
+
+  it('should query hasMany in for one', async () => {
+    const hit = await payload.create({
+      collection: 'books',
+      data: {
+        author: "author with tags: one, five",
+        title: "title with tags: one, five",
+        publisher: "publisher with tags: one, five",
+        tags: ['one', 'five']
+      },
+    })
+
+    const miss = await payload.create({
+      collection: 'books',
+      data: {
+        author: "author with tags: two",
+        title: "title with tags: two",
+        publisher: "publisher with tags: two",
+        tags: ['two'],
+      },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'books',
+      where: {
+        tags: {
+          in: ['one'],
+        },
+      },
+    })
+
+    expect(docs.length).toBeGreaterThan(0);
+
+    for (let doc of docs) {
+      expect(doc.tags).toContain('one');
+      expect(doc.tags).not.toContain('two');
+    }
+
+  })
+
+  it('should query hasMany in for one + five', async () => {
+    const hit = await payload.create({
+      collection: 'books',
+      data: {
+        author: "author with tags: one, five",
+        title: "title with tags: one, five",
+        publisher: "publisher with tags: one, five",
+        tags: ['one', 'five']
+      },
+    })
+
+    const miss = await payload.create({
+      collection: 'books',
+      data: {
+        author: "author with tags: two",
+        title: "title with tags: two",
+        publisher: "publisher with tags: two",
+        tags: ['two'],
+      },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'books',
+      where: {
+        tags: {
+          in: ['one', 'five'],
+        },
+      },
+    })
+
+    expect(docs.length).toBeGreaterThan(0);
+
+    for (let doc of docs) {
+      expect(doc.tags).toContain('one');
+      expect(doc.tags).toContain('five');
+      expect(doc.tags).not.toContain('two');
+    }
+
+  })
+
+
+
+  it('should query hasMany in for one + two with no results', async () => {
+    const hit = await payload.create({
+      collection: 'books',
+      data: {
+        author: "author with tags: one, five",
+        title: "title with tags: one, five",
+        publisher: "publisher with tags: one, five",
+        tags: ['one', 'five']
+      },
+    })
+
+    const miss = await payload.create({
+      collection: 'books',
+      data: {
+        author: "author with tags: two",
+        title: "title with tags: two",
+        publisher: "publisher with tags: two",
+        tags: ['two'],
+      },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'books',
+      where: {
+        tags: {
+          in: ['one', 'two'],
+        },
+      },
+    })
+
+    expect(docs).toHaveLength(0);
+
+
+  })
+
 })
