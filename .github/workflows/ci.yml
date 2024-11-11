@@ -12,13 +12,6 @@ jobs:
   unit-test:
     runs-on: 'ubuntu-latest'
 
-    services:
-      firestore:
-        image: preisvergleich/gcloud-firestore:889
-        #
-        ports:
-          - 8080:8086
-          
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v4'
@@ -35,10 +28,6 @@ jobs:
           node-version: 20.12.2
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-
-      - name: See if Emulator runs
-        run: |
-          curl -v  http://localhost:8080/
 
       - name: Install dependencies and build
         run: |
