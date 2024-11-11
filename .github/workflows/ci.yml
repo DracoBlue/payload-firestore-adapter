@@ -51,7 +51,7 @@ jobs:
           CI: true
         continue-on-error: true
         run: |
-          pnpm run test --reporters="default" --reporters="summary" --reporters="jest-ctrf-json-reporter" --config=test/jest.config.js --runInBand test/
+          pnpm run test --reporters="default" --reporters="summary" --reporters="jest-ctrf-json-reporter"
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
