@@ -5,8 +5,10 @@ This is an unofficial and completely experimental and not at all finished firest
 ## TODOs
 
 - [x] build proof of concept
-- [ ] setup github actions for integration testing with payload beta branch
-- [ ] implement features as rough proof of concept
+- [x] setup github actions for integration testing with payload beta branch
+- [x] setup github actions for unit tests with jest
+- [x] setup github actions for integration tests with jest
+- [x] implement features as rough proof of concept
 - [ ] implement features to be valid for all int.spec.ts tests on payload 3.0
   - [ ] add unique constraints handling (firestore.runTransaction + search + insert)
   - [ ] add locale handling
