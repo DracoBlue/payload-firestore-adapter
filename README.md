@@ -15,7 +15,7 @@ This is an unofficial and completely experimental and not at all finished firest
   - [ ] custom db names
   - [ ] virtual database fields
 - [ ] upstream changes to adjust drizzle/mongodb hardcoded parts
-  - [ ] test/helpers/snapshot.ts (they way to store and restore snapshots)
+  - [ ] test/helpers/snapshot.ts (the way to store and restore snapshots)
   - [ ] test/helpers/reset.ts (the way to empty the databases)
 - [ ] setup github actions for npm releases
 
