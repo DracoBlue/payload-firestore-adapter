@@ -62,6 +62,65 @@ jobs:
         run: npx github-actions-ctrf ctrf/ctrf-report.json
         if: always()
 
+  int-test:
+    runs-on: 'ubuntu-latest'
+
+    services:
+      firestore:
+        image: preisvergleich/gcloud-firestore:889
+        #
+        ports:
+          - 8080:8086
+          
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v4'
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: '9.7.1'
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.12.2
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: See if Emulator runs
+        run: |
+          curl -v  http://localhost:8080/
+
+      - name: Install adapter dependencies and build
+        run: |
+          pnpm install
+          pnpm build
+          pnpm prepack
+
+      - name: Install test app dependencies
+        run: |
+          cd dev
+          pnpm install
+
+      - name: Run tests
+        env:
+          CI: true
+        continue-on-error: true
+        run: |
+          cd dev
+          pnpm run test --reporters="default" --reporters="summary" --reporters="jest-ctrf-json-reporter"
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: int-test-ctrf-report
+          path: ctrf/ctrf-report.json
+          
+      - name: Run CTRF annotations
+        run: npx github-actions-ctrf ctrf/ctrf-report.json
+        if: always()
+      
   payload-int-test:
     runs-on: 'ubuntu-latest'
 

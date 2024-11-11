@@ -1,12 +1,33 @@
-module.exports = {
-  verbose: true,
+/** @type {import('ts-jest').JestConfigWithTsJest} **/
+const esModules = [
+  'file-type',
+  'strtok3',
+  'readable-web-to-node-stream',
+  'token-types',
+  'peek-readable',
+  'locate-path',
+  'p-locate',
+  'p-limit',
+  'yocto-queue',
+  'unicorn-magic',
+  'path-exists',
+  'qs-esm',
+  'uint8array-extras',
+  // payload
+  'payload'
+].join('|')
+
+export default {
+  preset: 'ts-jest/presets/default-esm',
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   testEnvironment: 'node',
   transform: {
-    '^.+\\.(t|j)sx?$': '<rootDir>/node_modules/@swc/jest',
+    '^.+\\.(t|j)sx?$': '@swc/jest',
   },
-  moduleNameMapper: {
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      '<rootDir>/src/mocks/fileStub.js',
-    '\\.(css|scss)$': '<rootDir>/src/mocks/fileStub.js',
-  },
-}
+  transformIgnorePatterns: [
+    `/node_modules/(?!.pnpm)(?!(${esModules})/)`,
+    `/node_modules/.pnpm/(?!(${esModules.replace(/\//g, '\\+')})@)`,
+    `/Users/jan/workspaces/payload-firestore-adapter/node_modules/(?!.pnpm)(?!(${esModules})/)`,
+    `/Users/jan/workspaces/payload-firestore-adapter/node_modules/.pnpm/(?!(${esModules.replace(/\//g, '\\+')})@)`,
+  ]
+};

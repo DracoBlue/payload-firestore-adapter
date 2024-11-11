@@ -14,6 +14,8 @@ export interface Config {
     users: User;
     pages: Page;
     media: Media;
+    topics: Topic;
+    books: Book;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -22,6 +24,8 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    topics: TopicsSelect<false> | TopicsSelect<true>;
+    books: BooksSelect<false> | BooksSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -29,8 +33,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect?: {};
+  globals: {
+    configuration: Configuration;
+    homepage: Homepage;
+  };
+  globalsSelect?: {
+    configuration: ConfigurationSelect<false> | ConfigurationSelect<true>;
+    homepage: HomepageSelect<false> | HomepageSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -121,6 +131,33 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics".
+ */
+export interface Topic {
+  id: string;
+  title?: string | null;
+  description?: string | null;
+  heroTitle?: string | null;
+  heroDescription?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "books".
+ */
+export interface Book {
+  id: string;
+  author: string;
+  title: string;
+  publisher: string;
+  topics?: (string | Topic)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -137,6 +174,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'topics';
+        value: string | Topic;
+      } | null)
+    | ({
+        relationTo: 'books';
+        value: string | Book;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -225,6 +270,31 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics_select".
+ */
+export interface TopicsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  heroTitle?: T;
+  heroDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "books_select".
+ */
+export interface BooksSelect<T extends boolean = true> {
+  author?: T;
+  title?: T;
+  publisher?: T;
+  topics?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -254,6 +324,56 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "configuration".
+ */
+export interface Configuration {
+  id: string;
+  heroTitle: string;
+  heroDescription: string;
+  heroFootnote: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage".
+ */
+export interface Homepage {
+  id: string;
+  heroTitle: string;
+  heroDescription: string;
+  heroFootnote: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "configuration_select".
+ */
+export interface ConfigurationSelect<T extends boolean = true> {
+  heroTitle?: T;
+  heroDescription?: T;
+  heroFootnote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage_select".
+ */
+export interface HomepageSelect<T extends boolean = true> {
+  heroTitle?: T;
+  heroDescription?: T;
+  heroFootnote?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
