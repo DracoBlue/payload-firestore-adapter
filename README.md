@@ -15,7 +15,7 @@ This is an unofficial and completely experimental and not at all finished firest
   - [ ] custom db names
   - [ ] virtual database fields
 - [ ] setup github actions for npm releases
-- [ ] run payload e2e tests
+- [ ] run payload e2e.spec.ts tests for payload 3.0
 - [ ] upstream changes to adjust drizzle/mongodb hardcoded parts
   - [ ] test/helpers/snapshot.ts (the way to store and restore snapshots)
   - [ ] test/helpers/reset.ts (the way to empty the databases)
