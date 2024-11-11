@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { generateQueryJson } from "./firestoreQueryJsonConverter";
+import { generateQueryJson } from "./../src/firestoreQueryJsonConverter";
 import { and, collection, getFirestore, or, query, where } from "firebase/firestore";
 
 let app = initializeApp({

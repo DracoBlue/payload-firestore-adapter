@@ -1,6 +1,6 @@
 import { collection, Firestore, getFirestore, query } from "firebase/firestore";
-import { generateQueryJson } from "./firestoreQueryJsonConverter";
-import { convertPayloadToFirestoreQuery } from "./firestoreUtils";
+import { generateQueryJson } from "./../src/firestoreQueryJsonConverter";
+import { convertPayloadToFirestoreQuery } from "./../src/firestoreUtils";
 import { Where } from "payload";
 import { initializeApp } from "firebase/app";
 
@@ -34,7 +34,11 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "value": "1234"
                 }
             ],
-            "orderBy": [],
+            "orderBy": [
+                {
+                    "field": "id",
+                }
+            ],
             "limit": null
         });
     });
@@ -71,7 +75,11 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "operator": "and"
                 }
             ],
-            "orderBy": [],
+            "orderBy": [
+                {
+                    "field": "id",
+                }
+            ],
             "limit": null
         });
     });
@@ -128,7 +136,11 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "operator": "and"
                 }
             ],
-            "orderBy": [],
+            "orderBy": [
+                {
+                    "field": "id",
+                }
+            ],
             "limit": null
         });
 
@@ -193,7 +205,11 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "operator": "and"
                 }
             ],
-            "orderBy": [],
+            "orderBy": [
+                {
+                    "field": "id",
+                }
+            ],
             "limit": null
         });
 
@@ -241,7 +257,11 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "operator": "and"
                 }
             ],
-            "orderBy": [],
+            "orderBy": [
+                {
+                    "field": "id",
+                }
+            ],
             "limit": null
         });
 
