@@ -26,8 +26,7 @@
   "main": "./dist/index.js",
   "types": "./dist/types.js",
   "files": [
-    "dist",
-    "mock.js"
+    "dist"
   ],
   "packageManager": "pnpm@9.7.1",
   "scripts": {

@@ -20,7 +20,8 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsSelect?: {
+  collectionsJoins: {};
+  collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -37,7 +38,7 @@ export interface Config {
     configuration: Configuration;
     homepage: Homepage;
   };
-  globalsSelect?: {
+  globalsSelect: {
     configuration: ConfigurationSelect<false> | ConfigurationSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
   };

@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=\"${NODE_OPTIONS} --no-deprecation\" next dev",
+    "dev": "cross-env PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example NODE_OPTIONS=\"${NODE_OPTIONS} --no-deprecation\" next dev",
     "devturbo": "pnpm dev --turbo",
     "devsafe": "rm -rf .next && pnpm dev",
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
@@ -17,11 +17,11 @@
     "generate:importmap": "payload generate:importmap"
   },
   "dependencies": {
-    "@payloadcms/next": "3.0.0-beta.123",
-    "@payloadcms/richtext-lexical": "3.0.0-beta.123",
-    "@payloadcms/ui": "3.0.0-beta.123",
-    "next": "15.0.0",
-    "payload": "3.0.0-beta.123",
+    "@payloadcms/next": "3.0.0-beta.127",
+    "@payloadcms/richtext-lexical": "3.0.0-beta.127",
+    "@payloadcms/ui": "3.0.0-beta.127",
+    "next": "15.0.3",
+    "payload": "3.0.0-beta.127",
     "payload-firestore-adapter": "workspace:*",
     "react": "19.0.0-rc-3edc000d-20240926",
     "react-dom": "19.0.0-rc-3edc000d-20240926"
