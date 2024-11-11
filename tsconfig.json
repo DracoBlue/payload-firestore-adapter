@@ -19,9 +19,9 @@
     "strict": false,
     "incremental": true,
     "isolatedModules": true,
-    "target": "esnext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "resolvePackageJsonExports": true,
     "resolveJsonModule": true
   },
