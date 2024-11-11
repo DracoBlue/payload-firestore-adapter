@@ -31,7 +31,9 @@
   ],
   "packageManager": "pnpm@9.7.1",
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:all": "pnpm build && pnpm -C dev build",
     "build:app": "pnpm -C dev build",
     "clean": "rimraf {dist,*.tsbuildinfo,package}",
