@@ -44,9 +44,9 @@ import {
   and,
 } from 'firebase/firestore'
 import { initializeApp } from 'firebase/app'
-import { convertPayloadToFirestoreQuery, calculatePageResultStatistics } from './firestoreUtils.ts'
-import { generateQueryJson } from './firestoreQueryJsonConverter.ts'
-import { FirestoreAdapter } from './types.ts'
+import { convertPayloadToFirestoreQuery, calculatePageResultStatistics } from './firestoreUtils.js'
+import { generateQueryJson } from './firestoreQueryJsonConverter.js'
+import { FirestoreAdapter } from './types.js'
 
 export function firestoreAdapter({
   defaultIDType = 'text',
