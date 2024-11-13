@@ -27,7 +27,7 @@ export default {
   transformIgnorePatterns: [
     `/node_modules/(?!.pnpm)(?!(${esModules})/)`,
     `/node_modules/.pnpm/(?!(${esModules.replace(/\//g, '\\+')})@)`,
-    `/Users/jan/workspaces/payload-firestore-adapter/node_modules/(?!.pnpm)(?!(${esModules})/)`,
-    `/Users/jan/workspaces/payload-firestore-adapter/node_modules/.pnpm/(?!(${esModules.replace(/\//g, '\\+')})@)`,
+    `../node_modules/(?!.pnpm)(?!(${esModules})/)`,
+    `../node_modules/.pnpm/(?!(${esModules.replace(/\//g, '\\+')})@)`,
   ]
 };
