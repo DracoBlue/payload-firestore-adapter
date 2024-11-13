@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 import { getPayload } from 'payload'
 import config from './src/payload.config';
 import assert from 'node:assert';
+import { Field } from 'payload';
 
 let payload: Payload;
 
@@ -222,7 +223,7 @@ describe('firestore adapter tests', () => {
   })
 
   it('should query hasMany in for one', async () => {
-    const hit = await payload.create({
+    const withTagsOneAndFive = await payload.create({
       collection: 'books',
       data: {
         author: "author with tags: one, five",
@@ -232,7 +233,7 @@ describe('firestore adapter tests', () => {
       },
     })
 
-    const miss = await payload.create({
+    const withTagTwo = await payload.create({
       collection: 'books',
       data: {
         author: "author with tags: two",
@@ -251,6 +252,10 @@ describe('firestore adapter tests', () => {
       },
     })
 
+    let tagFieldConfig = payload.collections["books"].config.fields.find((field) => (field as any).name === "tags");
+    expect(tagFieldConfig).toBeDefined();
+    expect(tagFieldConfig.name).toBe("tags");
+    expect(tagFieldConfig.hasMany).toBe(true);
     expect(docs.length).toBeGreaterThan(0);
 
     for (let doc of docs) {
@@ -261,7 +266,7 @@ describe('firestore adapter tests', () => {
   })
 
   it('should query hasMany in for one + five', async () => {
-    const hit = await payload.create({
+    const withTagsOneAndFive = await payload.create({
       collection: 'books',
       data: {
         author: "author with tags: one, five",
@@ -271,7 +276,7 @@ describe('firestore adapter tests', () => {
       },
     })
 
-    const miss = await payload.create({
+    const withTagTwo = await payload.create({
       collection: 'books',
       data: {
         author: "author with tags: two",
@@ -303,7 +308,7 @@ describe('firestore adapter tests', () => {
 
 
   it('should query hasMany in for one + two with no results', async () => {
-    const hit = await payload.create({
+    const withTagsOneAndFive = await payload.create({
       collection: 'books',
       data: {
         author: "author with tags: one, five",
@@ -313,7 +318,7 @@ describe('firestore adapter tests', () => {
       },
     })
 
-    const miss = await payload.create({
+    const withTagTwo = await payload.create({
       collection: 'books',
       data: {
         author: "author with tags: two",
@@ -323,16 +328,53 @@ describe('firestore adapter tests', () => {
       },
     })
 
-    const { docs } = await payload.find({
+    const { docs: inBothDocs } = await payload.find({
       collection: 'books',
       where: {
         tags: {
           in: ['one', 'two'],
         },
+        id: {
+          in: [withTagsOneAndFive.id, withTagTwo.id]
+        }
       },
+      limit: 0
     })
 
-    expect(docs).toHaveLength(0);
+    expect(inBothDocs).toHaveLength(2);
+
+
+    const { docs: inOneDocs } = await payload.find({
+      collection: 'books',
+      where: {
+        tags: {
+          in: ['one'],
+        },
+        id: {
+          in: [withTagsOneAndFive.id, withTagTwo.id]
+        }
+      },
+      limit: 0
+    })
+
+    expect(inOneDocs).toHaveLength(1);
+
+
+
+    const { docs: inNoneOfThoseDocs } = await payload.find({
+      collection: 'books',
+      where: {
+        tags: {
+          in: ['hai'],
+        },
+        id: {
+          in: [withTagsOneAndFive.id, withTagTwo.id]
+        }
+      },
+      limit: 0
+    })
+
+    expect(inNoneOfThoseDocs).toHaveLength(0);
 
 
   })

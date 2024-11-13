@@ -1,7 +1,7 @@
 import { collection, Firestore, getFirestore, query } from "firebase/firestore";
 import { generateQueryJson } from "./../src/firestoreQueryJsonConverter";
 import { convertPayloadToFirestoreQuery } from "./../src/firestoreUtils";
-import { Where } from "payload";
+import { Field, SanitizedCollectionConfig, Where } from "payload";
 import { initializeApp } from "firebase/app";
 
 let app = initializeApp({
@@ -9,6 +9,39 @@ let app = initializeApp({
 });
 let firestore = getFirestore(app);
 const collectionName = "testcollection";
+const sanitizedCollectionConfig = {
+    fields: [
+        {
+            name: "id",
+            type: "text",
+        } as Field,
+        {
+            name: "tags",
+            type: "text",
+            hasMany: true
+        } as Field,
+    ],
+    auth: {},
+    endpoints: [],
+    joins: [],
+    upload: {},
+    versions: {},
+    access: {},
+    admin: {},
+    custom: {},
+    dbName: "",
+    defaultPopulate: [],
+    defaultSort: "",
+    disableDuplicate: false,
+    graphQL: false,
+    hooks: {},
+    labels: {},
+    lockDocuments: false,
+    slug: collectionName,
+    timestamps: false,
+    typescript: {},
+    ui: {},
+} as unknown as SanitizedCollectionConfig;
 
 describe("convertPayloadToFirestoreQuery", () => {
 
@@ -23,7 +56,7 @@ describe("convertPayloadToFirestoreQuery", () => {
 
         const colRef = collection(firestore, collectionName);
 
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, whereOne) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
 
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "collection": "testcollection",
@@ -55,7 +88,7 @@ describe("convertPayloadToFirestoreQuery", () => {
             }]
         };
 
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, whereTwo) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereTwo) as unknown as any;
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "collection": "testcollection",
             "filters": [
@@ -110,7 +143,7 @@ describe("convertPayloadToFirestoreQuery", () => {
             ]
         };
 
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, whereThree) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereThree) as unknown as any;
 
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "collection": "testcollection",
@@ -174,7 +207,7 @@ describe("convertPayloadToFirestoreQuery", () => {
             ]
         };
 
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, whereFour) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereFour) as unknown as any;
 
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "collection": "testcollection",
@@ -236,7 +269,7 @@ describe("convertPayloadToFirestoreQuery", () => {
             ]
         };
 
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, whereFour) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereFour) as unknown as any;
         console.log(generateQueryJson(resultingQuery));
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "collection": "testcollection",
@@ -265,6 +298,89 @@ describe("convertPayloadToFirestoreQuery", () => {
             "limit": null
         });
 
+    });
+
+
+    test("in-query on a hasMany field", () => {
+        let whereOne: Where = {
+            and: [{
+                tags: {
+                    in: ["one", "two"]
+                }
+            }]
+        };
+
+        const colRef = collection(firestore, collectionName);
+
+        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
+        console.log(generateQueryJson(resultingQuery));
+
+        expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
+            "collection": "testcollection",
+            "filters": [
+                {
+                    "field": "tags",
+                    "operator": "array-contains-any",
+                    "value": {
+                        "values": [
+                            {
+                                "stringValue": "one"
+                            },
+                            {
+                                "stringValue": "two"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "orderBy": [
+                {
+                    "field": "id"
+                }
+            ],
+            "limit": null
+        });
+    });
+
+
+    test("in-query on a non-hasMany field", () => {
+        let whereOne: Where = {
+            and: [{
+                id: {
+                    in: ["one", "two"]
+                }
+            }]
+        };
+
+        const colRef = collection(firestore, collectionName);
+
+        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
+
+        expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
+            "collection": "testcollection",
+            "filters": [
+                {
+                    "field": "id",
+                    "operator": "in",
+                    "value": {
+                        "values": [
+                            {
+                                "stringValue": "one"
+                            },
+                            {
+                                "stringValue": "two"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "orderBy": [
+                {
+                    "field": "id"
+                }
+            ],
+            "limit": null
+        });
     });
 });
 

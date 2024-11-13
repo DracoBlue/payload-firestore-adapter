@@ -1,5 +1,5 @@
 import { collection, query, where, or, Firestore, QueryCompositeFilterConstraint, and, QueryFilterConstraint, orderBy, OrderByDirection } from 'firebase/firestore';
-import type { Sort } from 'payload';
+import type { Field, SanitizedCollectionConfig, Sort } from 'payload';
 
 
 /**
@@ -8,8 +8,19 @@ import type { Sort } from 'payload';
  * @param {Object} payloadQuery - The Payload CMS query JSON.
  * @returns {Query} - Firestore query.
  */
-export const convertPayloadToFirestoreQuery = function(firestore: Firestore, collectionName: string, payloadQuery: Record<string, any>, payloadSort?: Sort) {
+export const convertPayloadToFirestoreQuery = function(firestore: Firestore, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort) {
   console.log('convertPayloadToFirestoreQuery', collectionName, JSON.stringify(payloadQuery, null, 4));
+
+  let fieldNameMapCache = null;
+  let getFieldConfigByName = (name) => {
+    if (fieldNameMapCache === null) {
+      fieldNameMapCache = {}
+      for (let field of collectionConfig.fields as Field[]) {
+        fieldNameMapCache[(field as any).name] = field;
+      }
+    }
+    return fieldNameMapCache[name] || {};
+  }
 
   const processQuery = (queryObj: Record<string, any>): QueryFilterConstraint[] => {
     const constraints: QueryFilterConstraint[] = [];
@@ -54,8 +65,11 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
           }
           if (condition.hasOwnProperty('in')) {
             if (condition['in'].length) {
-              // TODO: if the field hasMany -> we need array-contains-any. But any means it does not matter what matches.
-              constraints.push(where(key, 'array-contains-any', condition['in']));
+              if (getFieldConfigByName(key).hasMany) {
+                constraints.push(where(key, 'array-contains-any', condition['in']));
+              } else {
+                constraints.push(where(key, 'in', condition['in']));
+              }
             } else {
               /* this makes 0 results ensured, because in is empty */
               constraints.push(where(key, '==', null));

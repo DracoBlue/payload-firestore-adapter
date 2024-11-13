@@ -1,29 +1,30 @@
-import type {
-  CreateArgs,
-  CreateGlobalArgs,
-  CreateGlobalVersionArgs,
-  CreateVersionArgs,
-  DeleteManyArgs,
-  DeleteOneArgs,
-  DeleteVersionsArgs,
-  FindArgs,
-  FindGlobalArgs,
-  FindGlobalVersionsArgs,
-  FindOneArgs,
-  FindVersionsArgs,
-  PaginatedDocs,
-  QueryDraftsArgs,
-  TypeWithVersion,
-  UpdateGlobalArgs,
-  UpdateGlobalVersionArgs,
-  UpdateOneArgs,
-  UpdateVersionArgs,
-  TypeWithID,
-  Document,
-  Where,
+import {
+  type CreateArgs,
+  type CreateGlobalArgs,
+  type CreateGlobalVersionArgs,
+  type CreateVersionArgs,
+  type DeleteManyArgs,
+  type DeleteOneArgs,
+  type DeleteVersionsArgs,
+  type FindArgs,
+  type FindGlobalArgs,
+  type FindGlobalVersionsArgs,
+  type FindOneArgs,
+  type FindVersionsArgs,
+  type PaginatedDocs,
+  type QueryDraftsArgs,
+  type TypeWithVersion,
+  type UpdateGlobalArgs,
+  type UpdateGlobalVersionArgs,
+  type UpdateOneArgs,
+  type UpdateVersionArgs,
+  type TypeWithID,
+  type Document,
+  type Where,
+  type BasePayload,
 } from 'payload'
 
-import type { CountArgs } from 'payload'
+import type { CountArgs, SanitizedCollectionConfig } from 'payload'
 import {
   collection,
   doc,
@@ -55,7 +56,7 @@ export function firestoreAdapter({
   defaultIDType?: 'number' | 'text'
   versionsSuffix?: string
 }) {
-  function adapter({ payload }: { payload: any }) {
+  function adapter({ payload }: { payload: BasePayload }) {
     return {
       name: 'firestore',
       packageName: 'payload-firestore-adapter',
@@ -162,11 +163,14 @@ export function firestoreAdapter({
 
         let firestoreQuery = query(colRef)
 
+        let collectionConfig = payload.collections[collectionName]?.config;
+
         // FIXME: maybe we can optimize if we search for just "one" item by id
         if (payloadWhereQuery) {
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             collectionName,
+            collectionConfig,
             payloadWhereQuery,
           )
         }
@@ -188,11 +192,14 @@ export function firestoreAdapter({
 
         let firestoreQuery = query(colRef)
 
+        let collectionConfig = payload.collections[collectionName]?.config;
+
         // FIXME: maybe we can optimize if we search for just "one" item by id
         if (payloadWhereQuery) {
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             collectionName,
+            collectionConfig,
             payloadWhereQuery,
           )
         }
@@ -222,11 +229,18 @@ export function firestoreAdapter({
 
         let firestoreQuery = query(colRef)
 
+        let collectionConfig = payload.collections[nonVersionCollectionName]?.config;
+
+        if (!collectionConfig) {
+          collectionConfig = payload.globals.config.find((global) => global.slug === nonVersionCollectionName) as unknown as SanitizedCollectionConfig;
+        }
+
         // FIXME: maybe we can optimize if we search for just "one" item by id
         if (payloadWhereQuery) {
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             versionCollectionName,
+            collectionConfig,
             payloadWhereQuery,
           )
         }
@@ -256,9 +270,10 @@ export function firestoreAdapter({
 
         let firestoreQuery = query(colRef);
 
+        let collectionConfig = payload.collections[collectionName]?.config;
+
         if (!sort) {
           console.log('no sort given');
-          let collectionConfig = payload.config.collections.find((collectionConfig) => collectionConfig.slug === collectionName);
           if (collectionConfig?.defaultSort) {
             console.log('found defaultSort', collectionConfig);
             sort = collectionConfig?.defaultSort;
@@ -269,6 +284,7 @@ export function firestoreAdapter({
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             collectionName,
+            collectionConfig,
             payloadWhereQuery,
             sort,
           )
@@ -276,6 +292,7 @@ export function firestoreAdapter({
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             collectionName,
+            collectionConfig,
             null,
             sort,
           )
@@ -370,19 +387,27 @@ export function firestoreAdapter({
 
         let firestoreQuery = query(colRef)
 
+        let collectionConfig = payload.collections[nonVersionCollectionName]?.config;
+
+        if (!collectionConfig) {
+          collectionConfig = payload.globals.config.find((global) => global.slug === nonVersionCollectionName) as unknown as SanitizedCollectionConfig;
+        }
+
         if (!sort) {
           console.log('no sort given');
-          let collectionConfig = payload.config.collections.find((collectionConfig) => collectionConfig.slug === nonVersionCollectionName);
           if (collectionConfig?.defaultSort) {
             console.log('found defaultSort', collectionConfig);
             sort = collectionConfig?.defaultSort;
           }
         }
 
+        payload.globals
+
         if (payloadWhereQuery) {
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             versionCollectionName,
+            collectionConfig,
             payloadWhereQuery,
             sort,
           )
@@ -390,6 +415,7 @@ export function firestoreAdapter({
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             versionCollectionName,
+            collectionConfig,
             null,
             sort,
           )
@@ -462,9 +488,14 @@ export function firestoreAdapter({
 
         let firestoreQuery = query(colRef)
 
+        let collectionConfig = payload.collections[nonVersionCollectionName]?.config;
+
+        if (!collectionConfig) {
+          collectionConfig = payload.globals.config.find((global) => global.slug === nonVersionCollectionName) as unknown as SanitizedCollectionConfig;
+        }
+
         if (!sort) {
           console.log('no sort given');
-          let collectionConfig = payload.config.collections.find((collectionConfig) => collectionConfig.slug === nonVersionCollectionName);
           if (collectionConfig?.defaultSort) {
             console.log('found defaultSort', collectionConfig);
             sort = collectionConfig?.defaultSort;
@@ -475,6 +506,7 @@ export function firestoreAdapter({
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             versionCollectionName,
+            collectionConfig,
             payloadWhereQuery,
             sort,
           )
@@ -482,6 +514,7 @@ export function firestoreAdapter({
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             versionCollectionName,
+            collectionConfig,
             null,
             sort,
           )
@@ -597,10 +630,13 @@ export function firestoreAdapter({
 
         let firestoreQuery = query(colRef)
 
+        let collectionConfig = payload.collections[collectionName]?.config;
+
         if (payloadWhereQuery) {
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             collectionName,
+            collectionConfig,
             payloadWhereQuery,
           )
         }
@@ -656,12 +692,14 @@ export function firestoreAdapter({
         console.log('fetch one', payloadCollectionName, { where: payloadWhereQuery, joins, locale })
 
         let firestoreQuery = query(colRef)
+        let collectionConfig = payload.collections[payloadCollectionName]?.config;
 
         // FIXME: maybe we can optimize if we search for just "one" item by id
         if (payloadWhereQuery) {
           firestoreQuery = convertPayloadToFirestoreQuery(
             this.firestore as Firestore,
             payloadCollectionName,
+            collectionConfig,
             payloadWhereQuery,
           )
         }
