@@ -12,6 +12,7 @@ This is an unofficial and completely experimental and not at all finished firest
 - [ ] implement features to be valid for all int.spec.ts tests on payload 3.0
   - [ ] add unique constraints handling (firestore.runTransaction + search + insert)
   - [ ] add locale handling
+  - [ ] handle array[*].texts[*] equals "string" (since array.texts is not supported for in+contains)
   - [ ] add "in" query for hasMany fields (to array-contains-any: array, array-contains: literal or in: array)
   - [ ] handle joins
   - [ ] add migrations handling

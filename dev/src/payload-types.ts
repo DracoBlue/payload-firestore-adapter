@@ -153,6 +153,12 @@ export interface Book {
   title: string;
   publisher: string;
   tags?: string[] | null;
+  array?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
   topics?: (string | Topic)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -291,6 +297,12 @@ export interface BooksSelect<T extends boolean = true> {
   title?: T;
   publisher?: T;
   tags?: T;
+  array?:
+    | T
+    | {
+        texts?: T;
+        id?: T;
+      };
   topics?: T;
   updatedAt?: T;
   createdAt?: T;

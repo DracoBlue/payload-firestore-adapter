@@ -17,11 +17,11 @@
     "generate:importmap": "payload generate:importmap"
   },
   "dependencies": {
-    "@payloadcms/next": "3.0.0-beta.127",
-    "@payloadcms/richtext-lexical": "3.0.0-beta.127",
-    "@payloadcms/ui": "3.0.0-beta.127",
+    "@payloadcms/next": "3.0.0-beta.130",
+    "@payloadcms/richtext-lexical": "3.0.0-beta.130",
+    "@payloadcms/ui": "3.0.0-beta.130",
     "next": "15.0.3",
-    "payload": "3.0.0-beta.127",
+    "payload": "3.0.0-beta.130",
     "payload-firestore-adapter": "workspace:*",
     "react": "19.0.0-rc-3edc000d-20240926",
     "react-dom": "19.0.0-rc-3edc000d-20240926"

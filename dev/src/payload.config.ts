@@ -103,6 +103,17 @@ export default buildConfig({
           hasMany: true,
         },
         {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              name: 'texts',
+              type: 'text',
+              hasMany: true,
+            },
+          ],
+        },
+        {
           name: 'topics',
           admin: {
             position: 'sidebar',
@@ -112,7 +123,7 @@ export default buildConfig({
           type: 'relationship',
         }
       ]
-    }
+    },
   ],
   globals: [ {
     slug: 'configuration',
