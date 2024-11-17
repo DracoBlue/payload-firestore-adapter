@@ -12,13 +12,25 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
   console.log('convertPayloadToFirestoreQuery', collectionName, JSON.stringify(payloadQuery, null, 4));
 
   let fieldNameMapCache = null;
-  let getFieldConfigByName = (name) => {
-    if (fieldNameMapCache === null) {
-      fieldNameMapCache = {}
-      for (let field of collectionConfig.fields as Field[]) {
-        fieldNameMapCache[(field as any).name] = field;
+  let fillSubFieldNameMapCache = (fields, prefix) => {
+    for (let field of fields as Field[]) {
+      fieldNameMapCache[prefix + (field as any).name] = field;
+      if (field.type === "array") {
+        fillSubFieldNameMapCache(field.fields, prefix + (field as any).name + ".");
+      }
+      if (field.type === "group") {
+        fillSubFieldNameMapCache(field.fields, prefix + (field as any).name + ".");
       }
     }
+  }
+
+  let getFieldConfigByName = (name, fields) => {
+    if (fieldNameMapCache === null) {
+      fieldNameMapCache = {}
+      fillSubFieldNameMapCache(fields, "");
+    }
+    console.log(fieldNameMapCache, fieldNameMapCache);
+
     return fieldNameMapCache[name] || {};
   }
 
@@ -58,14 +70,18 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
             constraints.push(where(key, '<=', condition['less_than_equal']));
           }
           if (condition.hasOwnProperty('equals')) {
-            constraints.push(where(key, '==', condition['equals']));
+            if (getFieldConfigByName(key, collectionConfig.fields).hasMany) {
+              constraints.push(where(key, 'array-contains', condition['equals']));
+            } else {
+              constraints.push(where(key, '==', condition['equals']));
+            }
           }
           if (condition.hasOwnProperty('not_equal')) {
             constraints.push(where(key, '!=', condition['not_equal']));
           }
           if (condition.hasOwnProperty('in')) {
             if (condition['in'].length) {
-              if (getFieldConfigByName(key).hasMany) {
+              if (getFieldConfigByName(key, collectionConfig.fields).hasMany) {
                 constraints.push(where(key, 'array-contains-any', condition['in']));
               } else {
                 constraints.push(where(key, 'in', condition['in']));
@@ -81,6 +97,10 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
           // FIXME: like does not exist, but we use https://stackoverflow.com/a/75877483 as a workaround (prefix search)
           if (condition.hasOwnProperty('like')) {
             constraints.push(and(where(key, '>=', condition['like']), where(key, '<=', condition['like'] + '\uf8ff')));
+          }
+          // FIXME: contains does not exist, but we use https://stackoverflow.com/a/75877483 as a workaround (prefix search)
+          if (condition.hasOwnProperty('contains')) {
+            constraints.push(and(where(key, '>=', condition['contains']), where(key, '<=', condition['contains'] + '\uf8ff')));
           }
           if (condition.hasOwnProperty('exists')) {
             if (condition.exists === true) {

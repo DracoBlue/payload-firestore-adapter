@@ -156,9 +156,14 @@ export interface Book {
   array?:
     | {
         texts?: string[] | null;
+        text?: string | null;
         id?: string | null;
       }[]
     | null;
+  group?: {
+    texts?: string[] | null;
+    text?: string | null;
+  };
   topics?: (string | Topic)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -301,7 +306,14 @@ export interface BooksSelect<T extends boolean = true> {
     | T
     | {
         texts?: T;
+        text?: T;
         id?: T;
+      };
+  group?:
+    | T
+    | {
+        texts?: T;
+        text?: T;
       };
   topics?: T;
   updatedAt?: T;

@@ -111,6 +111,26 @@ export default buildConfig({
               type: 'text',
               hasMany: true,
             },
+
+            {
+              name: 'text',
+              type: 'text'
+            },
+          ],
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'texts',
+              type: 'text',
+              hasMany: true,
+            },
+            {
+              name: 'text',
+              type: 'text',
+            },
           ],
         },
         {

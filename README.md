@@ -24,6 +24,12 @@ This is an unofficial and completely experimental and not at all finished firest
   - [ ] test/helpers/snapshot.ts (the way to store and restore snapshots)
   - [ ] test/helpers/reset.ts (the way to empty the databases)
 
+## Technical differences
+
+* "like" query
+  * Firestore does not support like queries with wild card. Thus we convert it into a prefix search.
+* "contains" query
+  * Firestore cannot do "contains" queries. Thus we convert it into a prefix search.
 
 ## License
 
