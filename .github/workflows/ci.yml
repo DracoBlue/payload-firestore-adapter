@@ -134,7 +134,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: payloadcms/payload
-          ref: beta
+          ref: v3.0.0
           path: payload
 
       - name: Install Node.js
