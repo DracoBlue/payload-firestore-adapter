@@ -29,8 +29,6 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
       fieldNameMapCache = {}
       fillSubFieldNameMapCache(fields, "");
     }
-    console.log(fieldNameMapCache, fieldNameMapCache);
-
     return fieldNameMapCache[name] || {};
   }
 
