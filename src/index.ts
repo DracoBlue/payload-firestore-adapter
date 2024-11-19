@@ -694,6 +694,7 @@ export function firestoreAdapter({
         locale,
         where: payloadWhereQuery,
       }: FindGlobalArgs): Promise<T> {
+        console.log('findGlobal in', payloadGlobalName, 'where', payloadWhereQuery, 'and', {select, locale});
         let doc = this.findOne({
           collection: payloadGlobalName,
           req,
@@ -716,7 +717,7 @@ export function firestoreAdapter({
         joins,
       }: FindOneArgs): Promise<T | null> {
         const colRef = collection(this.firestore as Firestore, payloadCollectionName)
-        console.log('fetch one', payloadCollectionName, { where: payloadWhereQuery, joins, locale, select })
+        console.log('fetch one', payloadCollectionName, 'where', payloadWhereQuery, 'and', {joins, locale, select })
 
         let firestoreQuery = query(colRef)
         let collectionConfig = payload.collections[payloadCollectionName]?.config;

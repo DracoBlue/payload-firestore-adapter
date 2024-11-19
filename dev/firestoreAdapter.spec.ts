@@ -142,28 +142,34 @@ describe('firestore adapter tests', () => {
   }, DEFAULT_TIMEOUT);
 
   it('update and read globals', async () => {
-    const topics: any = await payload.find({
+    let topicTitle = "DIY";
+    
+    let topicCreated = await payload.create({
+      collection: 'topics',
+      data: {
+        title: topicTitle,
+      }
+    });
+
+    const {docs}: any = await payload.find({
       collection: 'topics',
       where: {
         title: {
-          equals: "DIY",
+          equals: topicTitle,
         },
+      },
+      select: {
+        title: true
       },
       limit: 1
     });
 
-    let topic = null;
-  
-      if (topics.docs.length) {
-        topic = topics.docs[0];
-      } else {
-        topic = await payload.create({
-          collection: 'topics',
-          data: {
-            title: "DIY",
-          }
-        });
-      }
+    let topic = docs[0];
+
+    expect(topic).toStrictEqual({
+      id: topic.id,
+      title: topicTitle
+    });
 
     let configuration: any = await payload.updateGlobal({
       slug: 'configuration',

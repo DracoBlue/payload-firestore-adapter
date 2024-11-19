@@ -1,4 +1,4 @@
-import { collection, Firestore, getFirestore, query } from "firebase/firestore";
+import { collection, Firestore, getFirestore, Query, query } from "firebase/firestore";
 import { generateQueryJson } from "./../src/firestoreQueryJsonConverter";
 import { convertPayloadToFirestoreQuery } from "./../src/firestoreUtils";
 import { Field, SanitizedCollectionConfig, Where } from "payload";
@@ -143,8 +143,8 @@ describe("convertPayloadToFirestoreQuery", () => {
             ]
         };
 
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereThree) as unknown as any;
-
+        let resultingQuery: Query = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereThree) as unknown as any;
+        
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "collection": "testcollection",
             "filters": [
