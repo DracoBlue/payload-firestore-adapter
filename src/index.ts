@@ -1,4 +1,5 @@
 import {
+  type CountArgs,
   type CreateArgs,
   type CreateGlobalArgs,
   type CreateGlobalVersionArgs,
@@ -13,19 +14,18 @@ import {
   type FindVersionsArgs,
   type PaginatedDocs,
   type QueryDraftsArgs,
+  type SanitizedCollectionConfig,
   type TypeWithVersion,
   type UpdateGlobalArgs,
   type UpdateGlobalVersionArgs,
   type UpdateOneArgs,
   type UpdateVersionArgs,
-  type UpsertArgs,
   type TypeWithID,
   type Document,
   type Where,
   type BasePayload,
 } from 'payload'
 
-import type { CountArgs, SanitizedCollectionConfig } from 'payload'
 import {
   collection,
   doc,
@@ -807,7 +807,7 @@ export function firestoreAdapter({
         joins,
         select,
         locale,
-      }: UpsertArgs): Promise<Document> {
+      }: any): Promise<Document> {
         return this.updateOne({
           collection: payloadCollectionName,
           data,
