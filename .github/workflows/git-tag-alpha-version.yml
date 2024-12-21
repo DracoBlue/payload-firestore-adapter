@@ -53,4 +53,5 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           git tag "v$VERSION"
+          git push https://${GH_PAT}@github.com/${{ github.repository }}
           git push https://${GH_PAT}@github.com/${{ github.repository }} --tags
