@@ -41,8 +41,8 @@ jobs:
 
       - name: Commit Version Bump
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "DracoBlue"
+          git config user.email "JanS@DracoBlue.de"
           git add package.json
           VERSION=$(node -p "require('./package.json').version")
           git commit -m "chore: bump alpha version v$VERSION"
