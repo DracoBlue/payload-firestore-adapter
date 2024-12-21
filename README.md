@@ -2,6 +2,28 @@
 
 This is an unofficial and completely experimental and not at all finished firestore database adapter for payload cms 3.0 beta.
 
+## Testing the alpha
+
+> Caution: **It's not fully working (only 70% of the official payload integration tests pass). It uses the firestore emulator. Do not use it!**
+
+```console
+$ pnpm install --save payload-firestore-adapter@alpha
+```
+
+In your payload.config.ts add:
+
+```
+import { firestoreAdapter } from 'payload-firestore-adapter';
+```
+
+and initialize the db like this:
+
+```
+db: firestoreAdapter({})
+```
+
+start firestore emulator locally and it will connect accordingly.
+
 ## TODOs
 
 - [x] build proof of concept
