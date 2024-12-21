@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   prerelease:
     name: Bump Alpha Version and Create Tag
@@ -13,6 +16,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true # Required to push changes back to the repo
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
