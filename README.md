@@ -22,7 +22,7 @@ and initialize the db like this:
 db: firestoreAdapter({})
 ```
 
-start firestore emulator locally and it will connect accordingly.
+set `FIRESTORE_EMULATOR_HOST=localhost:8080` before booting your payloadcms and start firestore emulator locally and it will connect accordingly.
 
 ## TODOs
 
