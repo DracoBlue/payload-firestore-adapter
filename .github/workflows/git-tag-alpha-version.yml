@@ -48,8 +48,9 @@ jobs:
           git commit -m "chore: bump alpha version v$VERSION"
 
       - name: Create Alpha Tag and Push Changes
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           VERSION=$(node -p "require('./package.json').version")
           git tag "v$VERSION"
-          git push origin main --tags
-          git push
+          git push https://${GH_PAT}@github.com/${{ github.repository }} --tags
