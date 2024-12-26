@@ -1,22 +1,20 @@
-import { Query, query, where, or, WhereFilterOp, and, collection, Firestore } from "firebase/firestore";
-
 export const generateQueryJson = (queryObject: any) => {
-  const query = queryObject._query;
-  
+  const query = queryObject._queryOptions;
+ 
   // Extract collection path
-  const collection = query.path.segments.join('/');
+  const collection = query.collectionId;
 
   let mapFieldFilterToObject = (filter: any) => {
     if (filter.filters) {
       return {
         filters: filter.filters.map(mapFieldFilterToObject),
-        operator: filter.op
+        operator: filter.operator
       }
     } else {
       return {
         field: filter.field.segments.join('.'),
         operator: filter.op,
-        value: filter.value.stringValue || filter.value.integerValue || filter.value.doubleValue || filter.value.booleanValue || filter.value.arrayValue || null
+        value: filter.value
       };
     }
   };
@@ -25,7 +23,7 @@ export const generateQueryJson = (queryObject: any) => {
   const filters = query.filters.map(mapFieldFilterToObject);
 
   // Extract ordering
-  const orderBy = (query.explicitOrderBy || []).map((order: { field: { segments: any[]; }; direction: any; }) => ({
+  const orderBy = (query.fieldOrders || []).map((order: { field: { segments: any[]; }; direction: any; }) => ({
     field: order.field.segments.join('.'),
     direction: order.direction
   }));
