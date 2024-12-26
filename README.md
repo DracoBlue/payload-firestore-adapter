@@ -19,6 +19,8 @@ This is an unofficial and completely experimental and not at all finished firest
   - [ ] add migrations handling
   - [ ] custom db names
   - [ ] virtual database fields
+- [ ] make it work without the emulator
+  - [ ] fix `The query requires an index. You can create it here: ` (as the indexes are not required for emulator)
 - [ ] setup github actions for npm releases
 - [ ] run payload e2e.spec.ts tests for payload 3.0
 - [ ] upstream changes to adjust drizzle/mongodb hardcoded parts
