@@ -364,6 +364,19 @@ export function firestoreAdapter({
           where: payloadWhereQuery,
         })
       },
+      async countGlobalVersions<T = TypeWithID>({
+        global: payloadGlobalName,
+        req,
+        locale,
+        where: payloadWhereQuery
+      }: any): Promise<any> {
+        return await this.countVersions({
+          collection: payloadGlobalName,
+          req,
+          locale,
+          where: payloadWhereQuery,
+        })
+      },      
       async countVersions<T = TypeWithID>({
         collection: nonVersionCollectionName,
         req,
