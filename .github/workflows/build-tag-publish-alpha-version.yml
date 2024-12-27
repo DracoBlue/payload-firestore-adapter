@@ -51,6 +51,13 @@ jobs:
           git commit -m "chore: bump alpha version [skip ci]"
           git push
           
+      - name: Create Alpha Tag and Push Changes
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git tag "v$VERSION"
+          git push origin main --tags
+          git push
+          
       - name: Publish to NPM
         run: |
           pnpm config set //registry.npmjs.org/:_authToken ${NODE_AUTH_TOKEN}
