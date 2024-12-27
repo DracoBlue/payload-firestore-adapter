@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example NODE_OPTIONS=\"${NODE_OPTIONS} --no-deprecation\" next dev",
+    "dev:int": "cross-env PAYLOAD_DATABASE=firestore FIRESTORE_PROJECT_ID=payload-firestore-adapter NODE_OPTIONS=\"${NODE_OPTIONS} --no-deprecation\" next dev",
     "devturbo": "pnpm dev --turbo",
     "devsafe": "rm -rf .next && pnpm dev",
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
@@ -18,14 +19,14 @@
     "generate:importmap": "payload generate:importmap"
   },
   "dependencies": {
-    "@payloadcms/next": "3.0.0-beta.130",
-    "@payloadcms/richtext-lexical": "3.0.0-beta.130",
-    "@payloadcms/ui": "3.0.0-beta.130",
+    "@payloadcms/next": "3.11.0",
+    "@payloadcms/richtext-lexical": "3.11.0",
+    "@payloadcms/ui": "3.11.0",
     "next": "15.0.3",
-    "payload": "3.0.0-beta.130",
+    "payload": "3.11.0",
     "payload-firestore-adapter": "workspace:*",
-    "react": "19.0.0-rc-3edc000d-20240926",
-    "react-dom": "19.0.0-rc-3edc000d-20240926"
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
