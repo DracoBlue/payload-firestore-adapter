@@ -797,17 +797,17 @@ export function firestoreAdapter({
       async dropDatabase({adapter}: {adapter: any}): Promise<void> {
         console.log('starting to dropDatabase database');
         for (let collectionConfig of (payload.config.collections || [])) {
-          let collectionDocs = await getDocs(collection(this.firestore as Firestore, collectionConfig.slug));
-          for (let doc of collectionDocs.docs) {
+          let collectionDocs = await (this.firestore as Firestore).collection(collectionConfig.slug).listDocuments();
+          for (let doc of collectionDocs) {
             console.log('Deleting doc id:', doc.id, 'of', collectionConfig.slug);
-            await deleteDoc(doc.ref);
+            await doc.delete();
           }
         }
         for (let globalConfig of (payload.config.globals || [])) {
-          let globalDocs = await getDocs(collection(this.firestore as Firestore, globalConfig.slug));
-          for (let doc of globalDocs.docs) {
+          let globalDocs = await (this.firestore as Firestore).collection(globalConfig.slug).listDocuments();
+          for (let doc of globalDocs) {
             console.log('Deleting doc id:', doc.id, 'of', globalConfig.slug);
-            await deleteDoc(doc.ref);
+            await doc.delete();
           }
         }
         console.log('finished to dropDatabase database');
