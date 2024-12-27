@@ -1,6 +1,6 @@
 {
   "name": "payload-firestore-adapter",
-  "version": "0.2.0-alpha.7",
+  "version": "0.3.0-alpha.1",
   "description": "An unofficial firestore database adapter for Payload",
   "homepage": "https://github.com/dracoblue/payload-firestore-adapter",
   "repository": {
@@ -46,7 +46,6 @@
   },
   "dependencies": {
     "console-table-printer": "2.11.2",
-    "firebase": "11.0.2",
     "firebase-admin": "13.0.0",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",

@@ -1,4 +1,4 @@
-import { collection, query, where, or, Firestore, QueryCompositeFilterConstraint, and, QueryFilterConstraint, orderBy, OrderByDirection } from 'firebase/firestore';
+import { Filter, Firestore, OrderByDirection } from 'firebase-admin/firestore';
 import type { Field, SanitizedCollectionConfig, Sort } from 'payload';
 
 
@@ -32,79 +32,79 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
     return fieldNameMapCache[name] || {};
   }
 
-  const processQuery = (queryObj: Record<string, any>): QueryFilterConstraint[] => {
-    const constraints: QueryFilterConstraint[] = [];
+  const processQuery = (queryObj: Record<string, any>): Filter[] => {
+    const constraints: Filter[] = [];
 
     if (queryObj.and) {
       queryObj.and.forEach((condition: any) => {
         if (condition.or) {
           const orConditions = processQuery(condition);
-          constraints.push(or(...orConditions));
+          constraints.push(Filter.or(...orConditions));
         } else {
           const andConditions = processQuery(condition);
-          constraints.push(and(...andConditions));
+          constraints.push(Filter.and(...andConditions));
         }
       });
     } else if (queryObj.or) {
       const orConditions = queryObj.or.map((condition: any) => processQuery(condition));
-      const flattenedConstraints = orConditions.flat() as QueryCompositeFilterConstraint[];
-      constraints.push(or(...flattenedConstraints));
+      const flattenedConstraints = orConditions.flat() as Filter[];
+      constraints.push(Filter.or(...flattenedConstraints));
     } else {
       for (const key in queryObj) {
         const condition = queryObj[key];
         if (typeof condition === 'string' || typeof condition === 'number') {
-          constraints.push(where(key, '==', condition));
+          constraints.push(Filter.where(key, '==', condition));
         } else if (typeof condition === 'object') {
           if (condition.hasOwnProperty('greater_than')) {
-            constraints.push(where(key, '>', condition['greater_than']));
+            constraints.push(Filter.where(key, '>', condition['greater_than']));
           }
           if (condition.hasOwnProperty('greater_than_equal')) {
-            constraints.push(where(key, '>=', condition['greater_than_equal']));
+            constraints.push(Filter.where(key, '>=', condition['greater_than_equal']));
           }
           if (condition.hasOwnProperty('less_than')) {
-            constraints.push(where(key, '<', condition['less_than']));
+            constraints.push(Filter.where(key, '<', condition['less_than']));
           }
           if (condition.hasOwnProperty('less_than_equal')) {
-            constraints.push(where(key, '<=', condition['less_than_equal']));
+            constraints.push(Filter.where(key, '<=', condition['less_than_equal']));
           }
           if (condition.hasOwnProperty('equals')) {
             if (getFieldConfigByName(key, collectionConfig.fields).hasMany) {
-              constraints.push(where(key, 'array-contains', condition['equals']));
+              constraints.push(Filter.where(key, 'array-contains', condition['equals']));
             } else {
-              constraints.push(where(key, '==', condition['equals']));
+              constraints.push(Filter.where(key, '==', condition['equals']));
             }
           }
           if (condition.hasOwnProperty('not_equal')) {
-            constraints.push(where(key, '!=', condition['not_equal']));
+            constraints.push(Filter.where(key, '!=', condition['not_equal']));
           }
           if (condition.hasOwnProperty('in')) {
             if (condition['in'].length) {
               if (getFieldConfigByName(key, collectionConfig.fields).hasMany) {
-                constraints.push(where(key, 'array-contains-any', condition['in']));
+                constraints.push(Filter.where(key, 'array-contains-any', condition['in']));
               } else {
-                constraints.push(where(key, 'in', condition['in']));
+                constraints.push(Filter.where(key, 'in', condition['in']));
               }
             } else {
               /* this makes 0 results ensured, because in is empty */
-              constraints.push(where(key, '==', null));
+              constraints.push(Filter.where(key, '==', null));
             }
           }
           if (condition.hasOwnProperty('not_in')) {
-            constraints.push(where(key, 'not-in', condition['not_in']));
+            constraints.push(Filter.where(key, 'not-in', condition['not_in']));
           }
           // FIXME: like does not exist, but we use https://stackoverflow.com/a/75877483 as a workaround (prefix search)
           if (condition.hasOwnProperty('like')) {
-            constraints.push(and(where(key, '>=', condition['like']), where(key, '<=', condition['like'] + '\uf8ff')));
+            constraints.push(Filter.and(Filter.where(key, '>=', condition['like']), Filter.where(key, '<=', condition['like'] + '\uf8ff')));
           }
           // FIXME: contains does not exist, but we use https://stackoverflow.com/a/75877483 as a workaround (prefix search)
           if (condition.hasOwnProperty('contains')) {
-            constraints.push(and(where(key, '>=', condition['contains']), where(key, '<=', condition['contains'] + '\uf8ff')));
+            constraints.push(Filter.and(Filter.where(key, '>=', condition['contains']), Filter.where(key, '<=', condition['contains'] + '\uf8ff')));
           }
           if (condition.hasOwnProperty('exists')) {
             if (condition.exists === true) {
-              constraints.push(where(key, '!=', null));
+              constraints.push(Filter.where(key, '!=', null));
             } else {
-              constraints.push(where(key, '==', null));
+              constraints.push(Filter.where(key, '==', null));
             }
           }
         }
@@ -116,12 +116,13 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
 
 
 
-  let firestoreQuery = query(collection(firestore, collectionName))
+  let firestoreQuery = firestore.collection(collectionName).limit(0);
+  firestoreQuery.where('latest', '==', true);
   
   if (payloadQuery) {
     const firestoreConstraints = processQuery(payloadQuery);
-    const compositeFilter = and(...firestoreConstraints);
-    firestoreQuery = query(collection(firestore, collectionName), compositeFilter);
+    const compositeFilter = Filter.and(...firestoreConstraints);
+    firestoreQuery = firestore.collection(collectionName).where(compositeFilter);
   }
 
   if (!payloadSort) {
@@ -136,7 +137,7 @@ export const convertPayloadToFirestoreQuery = function(firestore: Firestore, col
   for (let payloadSortItem of payloadSort) {
     let payloadSortField = payloadSortItem.substr(0, 1) === '-' ? payloadSortItem.substr(1) : payloadSortItem;
     let payloadSortDirection : OrderByDirection = payloadSortItem.startsWith('-') ? 'desc' : 'asc';
-    firestoreQuery = query(firestoreQuery, orderBy(payloadSortField, payloadSortDirection));
+    firestoreQuery = firestoreQuery.orderBy(payloadSortField, payloadSortDirection);
   }
 
   return firestoreQuery;
