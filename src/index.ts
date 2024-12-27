@@ -364,6 +364,50 @@ export function firestoreAdapter({
           where: payloadWhereQuery,
         })
       },
+      async countVersions<T = TypeWithID>({
+        collection: nonVersionCollectionName,
+        req,
+        locale,
+        where: payloadWhereQuery,
+      }: any): Promise<any> {
+        let versionCollectionName = nonVersionCollectionName + this.versionsSuffix
+        console.log('trying to count versions', versionCollectionName, {locale})
+
+        const colRef = (this.firestore as Firestore).collection(versionCollectionName);
+        let firestoreQuery = colRef.limit(0);
+
+        let collectionConfig = payload.collections[nonVersionCollectionName]?.config;
+
+        if (!collectionConfig) {
+          collectionConfig = payload.globals.config.find((global) => global.slug === nonVersionCollectionName) as unknown as SanitizedCollectionConfig;
+        }
+
+        payload.globals
+
+        if (payloadWhereQuery) {
+          firestoreQuery = convertPayloadToFirestoreQuery(
+            this.firestore as Firestore,
+            versionCollectionName,
+            collectionConfig,
+            payloadWhereQuery,
+            null,
+          )
+        } else {
+          firestoreQuery = convertPayloadToFirestoreQuery(
+            this.firestore as Firestore,
+            versionCollectionName,
+            collectionConfig,
+            null,
+            null,
+          )
+        }
+
+        let totalDocsCount = (await (firestoreQuery.count().get())).data().count;
+
+        return {
+          totalDocs: totalDocsCount
+        }
+      },
       async findVersions<T = TypeWithID>({
         collection: nonVersionCollectionName,
         limit: payloadLimit,
@@ -812,7 +856,6 @@ export function firestoreAdapter({
         }
         console.log('finished to dropDatabase database');
       },
-
       init: async function (): Promise<void> {
         console.error('Function init not implemented.')
       },
