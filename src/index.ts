@@ -67,7 +67,7 @@ export function firestoreAdapter({
         }
 
         let entity = {
-          key: (this.firestore as Datastore).key([collectionName, data.id]),
+          key: (this.firestore as Datastore).key([collectionName, data.id as string]),
           data: {
             ...JSON.parse(JSON.stringify(data))
           },
