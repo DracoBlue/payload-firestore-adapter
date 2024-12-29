@@ -1,42 +1,43 @@
-export const generateQueryJson = (queryObject: any) => {
-  const query = queryObject._queryOptions;
- 
-  // Extract collection path
-  const collection = query.collectionId;
+import { Query } from '@google-cloud/datastore';
+
+export const generateQueryJson = (query: Query) => {
+  console.log(query);
+  const kinds = query.kinds;
 
   let mapFieldFilterToObject = (filter: any) => {
     if (filter.filters) {
       return {
         filters: filter.filters.map(mapFieldFilterToObject),
-        operator: filter.operator
+        operator: filter.op
       }
     } else {
       return {
-        field: filter.field.segments.join('.'),
+        field: filter.name,
         operator: filter.op,
-        value: filter.value
+        value: filter.val
       };
     }
   };
 
-  // Extract filters
-  const filters = query.filters.map(mapFieldFilterToObject);
+  const filters = [].concat(...query.entityFilters).concat(...query.filters).map(mapFieldFilterToObject);
+  // FIXME: groupByVal, selectVal, startVal, endVal
 
-  // Extract ordering
-  const orderBy = (query.fieldOrders || []).map((order: { field: { segments: any[]; }; direction: any; }) => ({
-    field: order.field.segments.join('.'),
-    direction: order.direction
-  }));
+  const orderBy = query.orders.map((order) => {
+    return {
+      field: order.name,
+      direction: order.sign === '-' ? 'DESCENDING' : 'ASCENDING'
+    };
+  })
 
-  // Extract limit
-  const limit = query.limit;
+  const limit = query.limitVal;
+  const offset = query.offsetVal;
 
-  // Construct simplified JSON representation
   const result = {
-    collection,
+    kinds,
     filters,
     orderBy,
-    limit
+    limit,
+    offset
   };
 
   return JSON.stringify(result, null, 4);

@@ -4,6 +4,8 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
   // Your Next.js config here
 
+  serverExternalPackages: ['@google-cloud/datastore'],
+
   // Allow for ESM .js import statements
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
