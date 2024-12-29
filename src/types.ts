@@ -2,11 +2,11 @@
 import type { BaseDatabaseAdapter } from 'payload'
 
 import {
-    Firestore,
-  } from 'firebase-admin/firestore'
+    Datastore,
+  } from '@google-cloud/datastore'
 
 export type FirestoreAdapter = BaseDatabaseAdapter & {
-    firestore?: Firestore
+    firestore?: Datastore
     versionsSuffix: string
   }
   
