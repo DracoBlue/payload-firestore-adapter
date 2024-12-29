@@ -1,123 +1,130 @@
-import { initializeApp } from "firebase-admin/app";
-import { generateQueryJson } from "./../src/firestoreQueryJsonConverter";
-import { Filter, getFirestore } from "firebase-admin/firestore";
+import { Datastore, or, and, PropertyFilter } from '@google-cloud/datastore';
+import { generateQueryJson } from './../src/firestoreQueryJsonConverter';
 
-let app = initializeApp({
-  projectId: "example"
+const datastore = new Datastore({
+  projectId: 'example',
 });
-let firestore = getFirestore(app);
 
-describe("generateQueryJson", () => {
-
-  test("simple where id == 1234", () => {
-
-    const collectionName = "testcollection";
-    const colRef = firestore.collection(collectionName);
-    const firestoreQuery = colRef.where("id", "==", "1234");
-    let json = generateQueryJson(firestoreQuery);
+describe('generateQueryJson', () => {
+  test('simple where id == 1234', () => {
+    const query = datastore.createQuery('testcollection').filter('id', '=', '1234');
+    let json = generateQueryJson(query);
     expect(JSON.parse(json)).toStrictEqual({
-      "collection": "testcollection",
-      "filters": [
+      kinds: ['testcollection'],
+      filters: [
         {
           "field": "id",
-          "operator": "EQUAL",
+          "operator": "=",
           "value": "1234"
         }
       ],
-      "orderBy": []
+      offset: -1,
+      limit: -1,
+      orderBy: [],
     });
-
   });
 
+  test('simple where id == 1234 and number == 5678', () => {
+    const query = datastore
+      .createQuery('testcollection')
+      .filter('id', '=', '1234')
+      .filter('number', '=', '5678');
 
-  test("simple where id == 1234 and number = 5678", () => {
-
-    const collectionName = "testcollection";
-    const colRef = firestore.collection(collectionName);
-    let firestoreQuery = colRef.where("id", "==", "1234");
-    firestoreQuery = firestoreQuery.where("number", "==", "5678");
-    let json = generateQueryJson(firestoreQuery);
+    let json = generateQueryJson(query);
     expect(JSON.parse(json)).toStrictEqual({
-      "collection": "testcollection",
-      "filters": [
+      kinds: ['testcollection'],
+      filters: [
         {
           "field": "id",
-          "operator": "EQUAL",
+          "operator": "=",
           "value": "1234"
         },
         {
           "field": "number",
-          "operator": "EQUAL",
+          "operator": "=",
           "value": "5678"
         }
       ],
-      "orderBy": []
+      orderBy: [],
+      offset: -1,
+      limit: -1,
     });
-
   });
 
+  test('simple where id IN (1234,5678)', () => {
+    const query = datastore.createQuery('testcollection').filter('id', 'IN', ['1234', '5678']);
 
-
-  test("simple where id in (1234,5678)", () => {
-
-    const collectionName = "testcollection";
-    const colRef = firestore.collection(collectionName);
-    let firestoreQuery = colRef.where("id", "in", ["1234", "5678"]);
-    let json = generateQueryJson(firestoreQuery);
+    let json = generateQueryJson(query);
     expect(JSON.parse(json)).toStrictEqual({
-      "collection": "testcollection",
-      "filters": [
+      kinds: ['testcollection'],
+      filters: [
         {
           "field": "id",
           "operator": "IN",
           "value": ["1234", "5678"]
         }
       ],
-      "orderBy": []
+      orderBy: [],
+      offset: -1,
+      limit: -1,
     });
   });
 
-  test("simple where id == 1234 or number == 5678", () => {
+  test('simple where id == 1234 OR number == 5678', () => {
+    const query = datastore.createQuery('testcollection');
 
-    const collectionName = "testcollection";
-    const colRef = firestore.collection(collectionName);
-    let firestoreQuery = colRef.where(Filter.or(Filter.where("id", "==", "1234"), Filter.where("number", "==", "5678")));
-    let json = generateQueryJson(firestoreQuery);
+    query.filter(or([
+      new PropertyFilter('id', '=', '1234'),
+      new PropertyFilter('number', '=', '5678'),
+    ]));
+
+    console.log(JSON.stringify(query.entityFilters, null, 4));
+
+    let json = generateQueryJson(query);
     expect(JSON.parse(json)).toStrictEqual({
-      "collection": "testcollection",
-      "filters": [
+      kinds: ['testcollection'],
+      filters: [
         {
           "filters": [
             {
               "field": "id",
-              "operator": "EQUAL",
+              "operator": "=",
               "value": "1234"
             },
             {
               "field": "number",
-              "operator": "EQUAL",
+              "operator": "=",
               "value": "5678"
             }
           ],
           "operator": "OR"
         }
       ],
-      "orderBy": []
+      "orderBy": [],
+      "limit": -1,
+      "offset": -1
     });
   });
 
+  test('combination where (id == 1234 OR number == 5678) AND (id == 9 OR number == 0)', () => {
+    const query = datastore.createQuery('testcollection');
 
-  test("combination where (id == 1234 or number == 5678) && (id == 9 or number == 0)", () => {
+    query.filter(and(
+      [
+        or([
+          new PropertyFilter('id', '=', '1234'),
+          new PropertyFilter('number', '=', '5678'),
+        ]),
+        or([
+          new PropertyFilter('id', '=', '9'),
+          new PropertyFilter('number', '=', '0'),
+        ])
+      ])
+    );
 
-    const collectionName = "testcollection";
-    const colRef = firestore.collection(collectionName);
-    let firestoreQuery = colRef.where(Filter.and(
-      Filter.or(Filter.where("id", "==", "1234"), Filter.where("number", "==", "5678")),
-      Filter.or(Filter.where("id", "==", "9"), Filter.where("number", "==", "0"))
-    ));
-    let json = generateQueryJson(firestoreQuery);
+    let json = generateQueryJson(query);
     expect(JSON.parse(json)).toStrictEqual({
-      "collection": "testcollection",
+      "kinds": ["testcollection"],
       "filters": [
         {
           "filters": [
@@ -125,12 +132,12 @@ describe("generateQueryJson", () => {
               "filters": [
                 {
                   "field": "id",
-                  "operator": "EQUAL",
+                  "operator": "=",
                   "value": "1234"
                 },
                 {
                   "field": "number",
-                  "operator": "EQUAL",
+                  "operator": "=",
                   "value": "5678"
                 }
               ],
@@ -140,12 +147,12 @@ describe("generateQueryJson", () => {
               "filters": [
                 {
                   "field": "id",
-                  "operator": "EQUAL",
+                  "operator": "=",
                   "value": "9"
                 },
                 {
                   "field": "number",
-                  "operator": "EQUAL",
+                  "operator": "=",
                   "value": "0"
                 }
               ],
@@ -155,20 +162,31 @@ describe("generateQueryJson", () => {
           "operator": "AND"
         }
       ],
-      "orderBy": []
+      "orderBy": [],
+      "limit": -1,
+      "offset": -1
     });
   });
 
-  test("combination where (id == 1234 or number == 5678) or (id == 9 or number == 0)", () => {
-    const collectionName = "testcollection";
-    const colRef = firestore.collection(collectionName);
-    let firestoreQuery = colRef.where(Filter.or(
-      Filter.or(Filter.where("id", "==", "1234"), Filter.where("number", "==", "5678")),
-      Filter.or(Filter.where("id", "==", "9"), Filter.where("number", "==", "0"))
-    ));
-    let json = generateQueryJson(firestoreQuery);
+  test('combination where (id == 1234 AND number == 5678) OR (id == 9 AND number == 0)', () => {
+    const query = datastore.createQuery('testcollection');
+
+    query.filter(or(
+      [
+        and([
+          new PropertyFilter('id', '=', '1234'),
+          new PropertyFilter('number', '=', '5678'),
+        ]),
+        and([
+          new PropertyFilter('id', '=', '9'),
+          new PropertyFilter('number', '=', '0'),
+        ])
+      ])
+    );
+
+    let json = generateQueryJson(query);
     expect(JSON.parse(json)).toStrictEqual({
-      "collection": "testcollection",
+      "kinds": ["testcollection"],
       "filters": [
         {
           "filters": [
@@ -176,64 +194,12 @@ describe("generateQueryJson", () => {
               "filters": [
                 {
                   "field": "id",
-                  "operator": "EQUAL",
+                  "operator": "=",
                   "value": "1234"
                 },
                 {
                   "field": "number",
-                  "operator": "EQUAL",
-                  "value": "5678"
-                }
-              ],
-              "operator": "OR"
-            },
-            {
-              "filters": [
-                {
-                  "field": "id",
-                  "operator": "EQUAL",
-                  "value": "9"
-                },
-                {
-                  "field": "number",
-                  "operator": "EQUAL",
-                  "value": "0"
-                }
-              ],
-              "operator": "OR"
-            }
-          ],
-          "operator": "OR"
-        }
-      ],
-      "orderBy": []
-    });
-  });
-
-
-  test("combination where (id == 1234 and number == 5678) or (id == 9 and number == 0)", () => {
-    const collectionName = "testcollection";
-    const colRef = firestore.collection(collectionName);
-    let firestoreQuery = colRef.where(Filter.or(
-      Filter.and(Filter.where("id", "==", "1234"), Filter.where("number", "==", "5678")),
-      Filter.and(Filter.where("id", "==", "9"), Filter.where("number", "==", "0"))
-    ));
-    let json = generateQueryJson(firestoreQuery);
-    expect(JSON.parse(json)).toStrictEqual({
-      "collection": "testcollection",
-      "filters": [
-        {
-          "filters": [
-            {
-              "filters": [
-                {
-                  "field": "id",
-                  "operator": "EQUAL",
-                  "value": "1234"
-                },
-                {
-                  "field": "number",
-                  "operator": "EQUAL",
+                  "operator": "=",
                   "value": "5678"
                 }
               ],
@@ -243,12 +209,12 @@ describe("generateQueryJson", () => {
               "filters": [
                 {
                   "field": "id",
-                  "operator": "EQUAL",
+                  "operator": "=",
                   "value": "9"
                 },
                 {
                   "field": "number",
-                  "operator": "EQUAL",
+                  "operator": "=",
                   "value": "0"
                 }
               ],
@@ -258,34 +224,38 @@ describe("generateQueryJson", () => {
           "operator": "OR"
         }
       ],
-      "orderBy": []
+      "orderBy": [],
+      "limit": -1,
+      "offset": -1
     });
   });
-
-
-
   test("two queries combining where id == 1234 and the other where searches fornumber == 5678", () => {
     const collectionName = "testcollection";
-    const colRef = firestore.collection(collectionName);
-    let firestoreQuery = colRef.where("id", "==", "1234");
-    firestoreQuery = firestoreQuery.where("number", "==", "5678");
-    let json = generateQueryJson(firestoreQuery);
+    const query = datastore
+      .createQuery('testcollection')
+      .filter('id', '=', '1234')
+      .filter('number', '=', '5678');
+
+      console.log(query);
+
+    let json = generateQueryJson(query);
     expect(JSON.parse(json)).toStrictEqual({
-      "collection": "testcollection",
+      "kinds": ["testcollection"],
       "filters": [
         {
           "field": "id",
-          "operator": "EQUAL",
+          "operator": "=",
           "value": "1234"
         },
         {
           "field": "number",
-          "operator": "EQUAL",
+          "operator": "=",
           "value": "5678"
         }
       ],
-      "orderBy": []
+      orderBy: [],
+      offset: -1,
+      limit: -1,
     });
-
   });
 });

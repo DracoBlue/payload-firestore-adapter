@@ -4,7 +4,7 @@ This is an unofficial and completely experimental and not at all finished firest
 
 ## Testing the alpha
 
-> Caution: **It's not fully working (only 70% of the official payload integration tests pass). It uses the firestore emulator. Do not use it!**
+> Caution: **It's not fully working (only 70% of the official payload integration tests pass). It uses the firestore emulator in datastore mode. Do not use it!**
 
 ```console
 $ pnpm install --save payload-firestore-adapter@alpha
@@ -22,10 +22,15 @@ and initialize the db like this:
 db: firestoreAdapter({})
 ```
 
-start the firestore emulator locally and set the env for
+start the firestore emulator with datastore mode activated locally
 
 ```
-FIRESTORE_EMULATOR_HOST=0.0.0.0:8080
+docker run --rm -it -p 8080 ghcr.io/dracoblue/payload-firestore-adapter/datastore-mode-emulator:504.1.0
+```
+and set the env for
+
+```
+DATASTORE_EMULATOR_HOST=0.0.0.0:8080
 FIRESTORE_PROJECT_ID=example 
 ```
 before booting your payloadcms and it will connect accordingly.

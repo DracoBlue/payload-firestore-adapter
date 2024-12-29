@@ -56,10 +56,9 @@ jobs:
 
     services:
       firestore:
-        image: preisvergleich/gcloud-firestore:889
-        #
+        image: ghcr.io/dracoblue/payload-firestore-adapter/datastore-mode-emulator:504.1.0
         ports:
-          - 8080:8086
+          - 8080:8080
           
     steps:
       - name: 'Checkout'
@@ -115,10 +114,9 @@ jobs:
 
     services:
       firestore:
-        image: preisvergleich/gcloud-firestore:889
-        #
+        image: ghcr.io/dracoblue/payload-firestore-adapter/datastore-mode-emulator:504.1.0
         ports:
-          - 8080:8086
+          - 8080:8080
           
     steps:
       - name: 'Checkout'
@@ -179,7 +177,7 @@ jobs:
           cp ../.github/files/jest.setup.js test/jest.setup.js
           cp ../.github/files/reset.ts test/helpers/reset.ts
           cp ../.github/files/snapshot.ts test/helpers/snapshot.ts
-          node_modules/.bin/cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore FIRESTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true node_modules/.bin/jest --forceExit --detectOpenHandles --reporters="default" --reporters="summary" --reporters="jest-ctrf-json-reporter" --config=test/jest.config.js --runInBand test/
+          node_modules/.bin/cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DATASTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true node_modules/.bin/jest --forceExit --detectOpenHandles --reporters="default" --reporters="summary" --reporters="jest-ctrf-json-reporter" --config=test/jest.config.js --runInBand test/
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:

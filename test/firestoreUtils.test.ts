@@ -1,13 +1,12 @@
-import { Firestore, getFirestore, Query } from "firebase-admin/firestore";
+import { Datastore, or, and, PropertyFilter, Query } from '@google-cloud/datastore';
 import { generateQueryJson } from "./../src/firestoreQueryJsonConverter";
 import { convertPayloadToFirestoreQuery } from "./../src/firestoreUtils";
 import { Field, SanitizedCollectionConfig, Where } from "payload";
-import { initializeApp } from "firebase-admin/app";
 
-let app = initializeApp({
-    projectId: "example"
-});
-let firestore = getFirestore(app);
+const datastore = new Datastore({
+    projectId: 'example',
+}) as any;
+
 const collectionName = "testcollection";
 const sanitizedCollectionConfig = {
     fields: [
@@ -54,16 +53,14 @@ describe("convertPayloadToFirestoreQuery", () => {
             }]
         };
 
-        const colRef = firestore.collection(collectionName);
-
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
 
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
-            "collection": "testcollection",
+            "kinds": ["testcollection"],
             "filters": [
                 {
                     "field": "id",
-                    "operator": "EQUAL",
+                    "operator": "=",
                     "value": "1234"
                 }
             ],
@@ -72,7 +69,9 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "field": "id",
                     "direction": "DESCENDING",
                 }
-            ]
+            ],
+            "limit": -1,
+            "offset": -1
         });
     });
     test("Simple id equals 1234 and _status equals draft", () => {
@@ -88,20 +87,20 @@ describe("convertPayloadToFirestoreQuery", () => {
             }]
         };
 
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereTwo) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereTwo) as unknown as any;
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
-            "collection": "testcollection",
+            "kinds": ["testcollection"],
             "filters": [
                 {
                     "filters": [
                         {
                             "field": "id",
-                            "operator": "EQUAL",
+                            "operator": '=',
                             "value": "1234"
                         },
                         {
                             "field": "_status",
-                            "operator": "EQUAL",
+                            "operator": '=',
                             "value": "draft"
                         }
                     ],
@@ -113,7 +112,9 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "field": "id",
                     "direction": "DESCENDING",
                 }
-            ]
+            ],
+            "limit": -1,
+            "offset": -1
         });
     });
     test("and(and(key=nav, user.relationTo=users, user.value=d0a5ea03-5ab9-4d57-b91e-9beabc1b3c28))", () => {
@@ -143,26 +144,26 @@ describe("convertPayloadToFirestoreQuery", () => {
             ]
         };
 
-        let resultingQuery: Query = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereThree) as unknown as any;
+        let resultingQuery: Query = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereThree) as unknown as any;
         
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
-            "collection": "testcollection",
+            "kinds": ["testcollection"],
             "filters": [
                 {
                     "filters": [
                         {
                             "field": "key",
-                            "operator": "EQUAL",
+                            "operator": '=',
                             "value": "nav"
                         },
                         {
                             "field": "user.relationTo",
-                            "operator": "EQUAL",
+                            "operator": '=',
                             "value": "users"
                         },
                         {
                             "field": "user.value",
-                            "operator": "EQUAL",
+                            "operator": '=',
                             "value": "d0a5ea03-5ab9-4d57-b91e-9beabc1b3c28"
                         }
                     ],
@@ -174,7 +175,9 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "field": "id",
                     "direction": "DESCENDING",
                 }
-            ]
+            ],
+            "limit": -1,
+            "offset": -1
         });
 
     });
@@ -207,10 +210,10 @@ describe("convertPayloadToFirestoreQuery", () => {
             ]
         };
 
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereFour) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereFour) as unknown as any;
 
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
-            "collection": "testcollection",
+            "kinds": ["testcollection"],
             "filters": [
                 {
                     "filters": [
@@ -218,12 +221,12 @@ describe("convertPayloadToFirestoreQuery", () => {
                             "filters": [
                                 {
                                     "field": "_status",
-                                    "operator": "EQUAL",
+                                    "operator": '=',
                                     "value": "published"
                                 },
                                 {
                                     "field": "_status",
-                                    "operator": "EQUAL",
+                                    "operator": '=',
                                     "value": null
                                 }
                             ],
@@ -231,7 +234,7 @@ describe("convertPayloadToFirestoreQuery", () => {
                         },
                         {
                             "field": "id",
-                            "operator": "EQUAL",
+                            "operator": '=',
                             "value": "935ae00f-91c6-4a91-8b0f-8c4ed4c04894"
                         }
                     ],
@@ -243,7 +246,9 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "field": "id",
                     "direction": "DESCENDING",
                 }
-            ]
+            ],
+            "limit": -1,
+            "offset": -1
         });
 
     });
@@ -269,21 +274,30 @@ describe("convertPayloadToFirestoreQuery", () => {
             ]
         };
 
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereFour) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereFour) as unknown as any;
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
-            "collection": "testcollection",
+            "kinds": ["testcollection"],
             "filters": [
                 {
                     "filters": [
                         {
-                            "field": "title",
-                            "operator": "GREATER_THAN_OR_EQUAL",
-                            "value": "title#2"
+                            "filters": [],
+                            "operator": "AND"
                         },
                         {
-                            "field": "title",
-                            "operator": "LESS_THAN_OR_EQUAL",
-                            "value": "title#2"
+                            "filters": [
+                                {
+                                    "field": "title",
+                                    "operator": ">=",
+                                    "value": "title#2"
+                                },
+                                {
+                                    "field": "title",
+                                    "operator": "<=",
+                                    "value": "title#2"
+                                }
+                            ],
+                            "operator": "AND"
                         }
                     ],
                     "operator": "AND"
@@ -294,7 +308,9 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "field": "id",
                     "direction": "DESCENDING",
                 }
-            ]
+            ],
+            "limit": -1,
+            "offset": -1
         });
 
     });
@@ -309,17 +325,15 @@ describe("convertPayloadToFirestoreQuery", () => {
             }]
         };
 
-        const colRef = firestore.collection(collectionName);
-
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
         console.log(generateQueryJson(resultingQuery));
 
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
-            "collection": "testcollection",
+            "kinds": ["testcollection"],
             "filters": [
                 {
                     "field": "tags",
-                    "operator": "ARRAY_CONTAINS_ANY",
+                    "operator": "IN",
                     "value": ["one", "two"]
                 }
             ],
@@ -328,7 +342,9 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "field": "id",
                     "direction": "DESCENDING",
                 }
-            ]
+            ],
+            "limit": -1,
+            "offset": -1
         });
     });
 
@@ -342,12 +358,10 @@ describe("convertPayloadToFirestoreQuery", () => {
             }]
         };
 
-        const colRef = firestore.collection(collectionName);
-
-        let resultingQuery = convertPayloadToFirestoreQuery(firestore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
+        let resultingQuery = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
 
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
-            "collection": "testcollection",
+            "kinds": ["testcollection"],
             "filters": [
                 {
                     "field": "id",
@@ -360,7 +374,9 @@ describe("convertPayloadToFirestoreQuery", () => {
                     "field": "id",
                     "direction": "DESCENDING",
                 }
-            ]
+            ],
+            "limit": -1,
+            "offset": -1
         });
     });
 });
