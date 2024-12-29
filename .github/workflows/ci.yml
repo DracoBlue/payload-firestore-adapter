@@ -56,10 +56,9 @@ jobs:
 
     services:
       firestore:
-        image: preisvergleich/gcloud-firestore:889
-        #
+        image: ghcr.io/dracoblue/payload-firestore-adapter/datastore-mode-emulator:504.1.0
         ports:
-          - 8080:8086
+          - 8080:8080
           
     steps:
       - name: 'Checkout'
