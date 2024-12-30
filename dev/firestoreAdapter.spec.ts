@@ -404,7 +404,7 @@ describe('firestore adapter tests', () => {
   }, DEFAULT_TIMEOUT);
 
 
-  it('order collection items', async () => {
+  it('order collection items and filter by publisher [fails on non-emulator]', async () => {
     let publisherName = 'publisher#5#' + crypto.randomUUID();
     let bookOne = await payload.create({
       collection: 'books',
@@ -447,7 +447,7 @@ describe('firestore adapter tests', () => {
       bookThree
     ];
 
-    let {docs: foundBooks}: any = await payload.find({
+    let foundBooks = (await payload.find({
         collection: 'books',
         where: {
           publisher: {
@@ -457,11 +457,11 @@ describe('firestore adapter tests', () => {
         sort: [
           'id'
         ]
-    });
+    })).docs;
 
-    assert(foundBooks.length === 3);
+    assert(foundBooks.length === createdBooks.length);
     createdBooks.sort((a, b) => a.id < b.id ? -1 : 1);
-    assert(foundBooks.map(doc => doc.id).join(' ') === createdBooks.map(doc => doc.id).join(' '), 'default sort id');
+    assert(foundBooks.map(doc => doc.id).join(' ') === createdBooks.map(doc => doc.id).join(' '), 'sort id');
 
     foundBooks = (await payload.find({
         collection: 'books',
@@ -477,8 +477,194 @@ describe('firestore adapter tests', () => {
 
     assert(foundBooks.length === 3);
     createdBooks.sort((a, b) => a.id > b.id ? -1 : 1);
-    assert(foundBooks.map(doc => doc.id).join(' ') === createdBooks.map(doc => doc.id).join(' '), 'default sort -id');
+    assert(foundBooks.map(doc => doc.id).join(' ') === createdBooks.map(doc => doc.id).join(' '), 'sort -id');
 }, DEFAULT_TIMEOUT);
+
+
+it('order and filter collection items by id', async () => {
+  let publisherName = 'publisher#5#' + crypto.randomUUID();
+  let bookOne = await payload.create({
+    collection: 'books',
+    data: {
+      author: "author#5",
+      title: "title#5#book#1",
+      publisher: publisherName
+    }
+  });
+  let bookTwo = await payload.create({
+    collection: 'books',
+    data: {
+      author: "author#5",
+      title: "title#5#book#2",
+      publisher: publisherName
+    }
+  });
+  let bookThree = await payload.create({
+    collection: 'books',
+    data: {
+      author: "author#5",
+      title: "title#5#book#3",
+      publisher: publisherName
+    }
+  });
+  console.log('bookOne', bookOne);
+  console.log('bookTwo', bookTwo);
+
+  //assert(book._status === "draft");
+  assert(bookOne.author === "author#5");
+  assert(bookOne.title === "title#5#book#1");
+  assert(bookOne.publisher === publisherName);
+  assert(bookOne.id);
+  assert(bookOne.updatedAt);
+  assert(bookOne.createdAt);
+
+  const createdBooks = [
+    bookOne,
+    bookTwo,
+    bookThree
+  ];
+
+  let {docs: foundBooks}: any = await payload.find({
+    collection: 'books',
+    where: {
+      id: {
+        in: [bookOne.id, bookTwo.id, bookThree.id],
+      },
+    },
+    sort: [
+      'id'
+    ]
+  });
+
+  assert(foundBooks.length === createdBooks.length);
+  createdBooks.sort((a, b) => a.id < b.id ? -1 : 1);
+  assert(foundBooks.map(doc => doc.id).join(' ') === createdBooks.map(doc => doc.id).join(' '), 'sort id');
+
+}, DEFAULT_TIMEOUT);
+
+
+
+it('order and filter collection items by -id', async () => {
+  let publisherName = 'publisher#5#' + crypto.randomUUID();
+  let bookOne = await payload.create({
+    collection: 'books',
+    data: {
+      author: "author#5",
+      title: "title#5#book#1",
+      publisher: publisherName
+    }
+  });
+  let bookTwo = await payload.create({
+    collection: 'books',
+    data: {
+      author: "author#5",
+      title: "title#5#book#2",
+      publisher: publisherName
+    }
+  });
+  let bookThree = await payload.create({
+    collection: 'books',
+    data: {
+      author: "author#5",
+      title: "title#5#book#3",
+      publisher: publisherName
+    }
+  });
+  console.log('bookOne', bookOne);
+  console.log('bookTwo', bookTwo);
+
+  //assert(book._status === "draft");
+  assert(bookOne.author === "author#5");
+  assert(bookOne.title === "title#5#book#1");
+  assert(bookOne.publisher === publisherName);
+  assert(bookOne.id);
+  assert(bookOne.updatedAt);
+  assert(bookOne.createdAt);
+
+  const createdBooks = [
+    bookOne,
+    bookTwo,
+    bookThree
+  ];
+
+  let {docs: foundBooks}: any = await payload.find({
+    collection: 'books',
+    where: {
+      id: {
+        in: [bookOne.id, bookTwo.id, bookThree.id]
+      },
+    },
+    sort: [
+      '-id'
+    ]
+  });
+
+  assert(foundBooks.length === createdBooks.length);
+  createdBooks.sort((a, b) => a.id > b.id ? -1 : 1);
+  assert(foundBooks.map(doc => doc.id).join(' ') === createdBooks.map(doc => doc.id).join(' '), 'sort -id');
+}, DEFAULT_TIMEOUT);
+
+
+
+it('order and filter collection items by default which is -id', async () => {
+  let publisherName = 'publisher#5#' + crypto.randomUUID();
+  let bookOne = await payload.create({
+    collection: 'books',
+    data: {
+      author: "author#5",
+      title: "title#5#book#1",
+      publisher: publisherName
+    }
+  });
+  let bookTwo = await payload.create({
+    collection: 'books',
+    data: {
+      author: "author#5",
+      title: "title#5#book#2",
+      publisher: publisherName
+    }
+  });
+  let bookThree = await payload.create({
+    collection: 'books',
+    data: {
+      author: "author#5",
+      title: "title#5#book#3",
+      publisher: publisherName
+    }
+  });
+  console.log('bookOne', bookOne);
+  console.log('bookTwo', bookTwo);
+
+  //assert(book._status === "draft");
+  assert(bookOne.author === "author#5");
+  assert(bookOne.title === "title#5#book#1");
+  assert(bookOne.publisher === publisherName);
+  assert(bookOne.id);
+  assert(bookOne.updatedAt);
+  assert(bookOne.createdAt);
+
+  const createdBooks = [
+    bookOne,
+    bookTwo,
+    bookThree
+  ];
+
+  let {docs: foundBooks}: any = await payload.find({
+    collection: 'books',
+    where: {
+      id: {
+        in: [bookOne.id, bookTwo.id, bookThree.id]
+      },
+    }
+  });
+
+
+  assert(foundBooks.length === createdBooks.length);
+  createdBooks.sort((a, b) => a.id > b.id ? -1 : 1);
+  assert(foundBooks.map(doc => doc.id).join(' ') === createdBooks.map(doc => doc.id).join(' '), 'sort -id');
+
+}, DEFAULT_TIMEOUT);
+
 /*
   it('should query hasMany within an array', async () => {
     const docFirst = await payload.create({
