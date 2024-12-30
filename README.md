@@ -25,7 +25,7 @@ db: firestoreAdapter({})
 start the firestore emulator with datastore mode activated locally
 
 ```
-docker run --rm -it -p 8080 ghcr.io/dracoblue/payload-firestore-adapter/datastore-mode-emulator:504.1.0
+docker run --rm -it -p 8080:8080 ghcr.io/dracoblue/payload-firestore-adapter/datastore-mode-emulator:504.1.0
 ```
 and set the env for
 

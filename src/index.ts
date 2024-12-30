@@ -72,12 +72,8 @@ export function firestoreAdapter({
             ...JSON.parse(JSON.stringify(data))
           },
         };
-
-        console.log('entity', entity);
       
-        let [response] = await (this.firestore as Datastore).insert(entity);
-
-        console.log('response', response);
+        await (this.firestore as Datastore).insert(entity);
 
         return { id: data.id, ...data }
       },
@@ -292,8 +288,6 @@ export function firestoreAdapter({
           payloadWhereQuery ? payloadWhereQuery : null,
           sort,
         );
-        // FIXME: we need orders, but those need indexes!
-        firestoreQuery.orders = [];
 
         let countQuery = convertPayloadToFirestoreQuery(
           this.firestore as Datastore,
@@ -465,8 +459,6 @@ export function firestoreAdapter({
           payloadWhereQuery ? payloadWhereQuery : null,
           sort,
         )
-        // FIXME: we need orders, but those need indexes!
-        firestoreQuery.orders = [];
 
         let countQuery = convertPayloadToFirestoreQuery(
           this.firestore as Datastore,
