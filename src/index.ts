@@ -465,8 +465,6 @@ export function firestoreAdapter({
           payloadWhereQuery ? payloadWhereQuery : null,
           sort,
         )
-        // FIXME: we need orders, but those need indexes!
-        firestoreQuery.orders = [];
 
         let countQuery = convertPayloadToFirestoreQuery(
           this.firestore as Datastore,
@@ -592,7 +590,7 @@ export function firestoreAdapter({
         let dataItems = []
 
         for (let doc of docs) {
-          let data = doc.data() as TypeWithVersion<T>
+          let data = doc as TypeWithVersion<T>
           dataItems.push({
             id: data.parent,
             ...data.version,
