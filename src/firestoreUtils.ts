@@ -42,14 +42,14 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
           const orConditions = processQuery(condition);
           if (orConditions.length === 1) {
             constraints.push(orConditions[0]);
-          } else {
+          } else if (orConditions.length > 1) {
             constraints.push(or(orConditions));
           }
         } else {
           const andConditions = processQuery(condition);
           if (andConditions.length === 1) {
             constraints.push(andConditions[0]);
-          } else {
+          } else if (andConditions.length > 1) {
             constraints.push(and(andConditions));
           }
         }
@@ -59,7 +59,7 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
       const flattenedConstraints = orConditions.flat() as Filter[];
       if (flattenedConstraints.length === 1) {
         constraints.push(flattenedConstraints[0]);
-      } else {
+      } else if (flattenedConstraints.length > 1) {
         constraints.push(or(flattenedConstraints));
       }
     } else {
