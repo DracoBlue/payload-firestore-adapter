@@ -68,19 +68,19 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
         if (typeof condition === 'string' || typeof condition === 'number') {
           constraints.push(new PropertyFilter(key, '=', condition));
         } else if (typeof condition === 'object') {
-          if (condition.hasOwnProperty('greater_than')) {
+          if ("greater_than" in condition) {
             constraints.push(new PropertyFilter(key, '>', condition['greater_than']));
           }
-          if (condition.hasOwnProperty('greater_than_equal')) {
+          if ('greater_than_equal' in condition) {
             constraints.push(new PropertyFilter(key, '>=', condition['greater_than_equal']));
           }
-          if (condition.hasOwnProperty('less_than')) {
+          if ('less_than' in condition) {
             constraints.push(new PropertyFilter(key, '<', condition['less_than']));
           }
-          if (condition.hasOwnProperty('less_than_equal')) {
+          if ('less_than_equal' in condition) {
             constraints.push(new PropertyFilter(key, '<=', condition['less_than_equal']));
           }
-          if (condition.hasOwnProperty('equals')) {
+          if ('equals' in condition) {
             if (getFieldConfigByName(key, collectionConfig.fields).hasMany) {
               // FIXME: check if it works
               constraints.push(new PropertyFilter(key, '=', condition['equals']));
@@ -88,10 +88,10 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
               constraints.push(new PropertyFilter(key, '=', condition['equals']));
             }
           }
-          if (condition.hasOwnProperty('not_equal')) {
+          if ('not_equal' in condition) {
             constraints.push(new PropertyFilter(key, '!=', condition['not_equal']));
           }
-          if (condition.hasOwnProperty('in')) {
+          if ('in' in condition) {
             if (condition['in'].length) {
               if (getFieldConfigByName(key, collectionConfig.fields).hasMany) {
                 // FIXME: check if it works
@@ -104,18 +104,18 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
               constraints.push(new PropertyFilter(key, '=', null));
             }
           }
-          if (condition.hasOwnProperty('not_in')) {
+          if ('not_in' in condition) {
             constraints.push(new PropertyFilter(key, 'NOT_IN', condition['not_in']));
           }
           // FIXME: like does not exist, but we use https://stackoverflow.com/a/75877483 as a workaround (prefix search)
-          if (condition.hasOwnProperty('like')) {
+          if ('like' in condition) {
             constraints.push(and([new PropertyFilter(key, '>=', condition['like']), new PropertyFilter(key, '<=', condition['like'] + '\uf8ff')]));
           }
           // FIXME: contains does not exist, but we use https://stackoverflow.com/a/75877483 as a workaround (prefix search)
-          if (condition.hasOwnProperty('contains')) {
+          if ('contains' in condition) {
             constraints.push(and([new PropertyFilter(key, '>=', condition['contains']), new PropertyFilter(key, '<=', condition['contains'] + '\uf8ff')]));
           }
-          if (condition.hasOwnProperty('exists')) {
+          if ('exists' in condition) {
             if (condition.exists === true) {
               constraints.push(new PropertyFilter(key, '!=', null));
             } else {
