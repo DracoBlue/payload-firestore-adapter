@@ -281,23 +281,14 @@ describe("convertPayloadToFirestoreQuery", () => {
                 {
                     "filters": [
                         {
-                            "filters": [],
-                            "operator": "AND"
+                            "field": "title",
+                            "operator": ">=",
+                            "value": "title#2"
                         },
                         {
-                            "filters": [
-                                {
-                                    "field": "title",
-                                    "operator": ">=",
-                                    "value": "title#2"
-                                },
-                                {
-                                    "field": "title",
-                                    "operator": "<=",
-                                    "value": "title#2"
-                                }
-                            ],
-                            "operator": "AND"
+                            "field": "title",
+                            "operator": "<=",
+                            "value": "title#2"
                         }
                     ],
                     "operator": "AND"
