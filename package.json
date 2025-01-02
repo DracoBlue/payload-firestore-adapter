@@ -45,8 +45,9 @@
     "prepublishOnly": "pnpm clean && pnpm build && pnpm copyfiles"
   },
   "dependencies": {
-    "console-table-printer": "2.11.2",
     "@google-cloud/datastore": "9.2.1",
+    "console-table-printer": "2.11.2",
+    "mingo": "^6.5.1",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "10.0.0"

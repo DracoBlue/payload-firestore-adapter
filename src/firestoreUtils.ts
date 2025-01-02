@@ -11,6 +11,7 @@ type Filter = any;
  */
 export const convertPayloadToFirestoreQuery = function(datastore: Datastore, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort) {
   console.log('convertPayloadToFirestoreQuery', collectionName, JSON.stringify(payloadQuery, null, 4));
+  const existsFalseFieldIds = [];
 
   let fieldNameMapCache = null;
   let fillSubFieldNameMapCache = (fields, prefix) => {
@@ -121,6 +122,7 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
               constraints.push(new PropertyFilter(key, '!=', null));
             } else {
               constraints.push(new PropertyFilter(key, '=', null));
+              existsFalseFieldIds.push(key);
             }
           }
         }
@@ -157,7 +159,9 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
   for (let payloadSortItem of payloadSort) {
     let payloadSortField = payloadSortItem.substr(0, 1) === '-' ? payloadSortItem.substr(1) : payloadSortItem;
     let payloadSortDirection = payloadSortItem.startsWith('-') ? 'desc' : 'asc';
-    firestoreQuery = firestoreQuery.order(payloadSortField, {descending: payloadSortDirection === 'desc'});
+    if (existsFalseFieldIds.indexOf(payloadSortField) === -1) {
+      firestoreQuery = firestoreQuery.order(payloadSortField, {descending: payloadSortDirection === 'desc'});
+    }
   }
 
 
