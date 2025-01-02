@@ -88,8 +88,8 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
               constraints.push(new PropertyFilter(key, '=', condition['equals']));
             }
           }
-          if ('not_equal' in condition) {
-            constraints.push(new PropertyFilter(key, '!=', condition['not_equal']));
+          if ('not_equals' in condition) {
+            constraints.push(new PropertyFilter(key, '!=', condition['not_equals']));
           }
           if ('in' in condition) {
             if (condition['in'].length) {

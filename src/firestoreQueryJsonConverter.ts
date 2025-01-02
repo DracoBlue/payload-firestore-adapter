@@ -1,9 +1,10 @@
 import { Query } from '@google-cloud/datastore';
 
-export const generateQueryJson = (query: Query) => {
-  console.log(query);
-  const kinds = query.kinds;
 
+export const logQuery = (message, query: Query) => {
+  console.log(message, generateQueryJson(query));
+}
+export const generateQueryJson = ({namespace, kinds, filters, entityFilters, orders, groupByVal, selectVal, startVal, endVal, limitVal, offsetVal}: Query) => {
   let mapFieldFilterToObject = (filter: any) => {
     if (filter.filters) {
       return {
@@ -19,25 +20,22 @@ export const generateQueryJson = (query: Query) => {
     }
   };
 
-  const filters = [].concat(...query.entityFilters).concat(...query.filters).map(mapFieldFilterToObject);
+  const allFilters = [].concat(...entityFilters).concat(...filters).map(mapFieldFilterToObject);
   // FIXME: groupByVal, selectVal, startVal, endVal
 
-  const orderBy = query.orders.map((order) => {
+  const orderBy = orders.map((order) => {
     return {
       field: order.name,
       direction: order.sign === '-' ? 'DESCENDING' : 'ASCENDING'
     };
   })
 
-  const limit = query.limitVal;
-  const offset = query.offsetVal;
-
   const result = {
     kinds,
-    filters,
+    filters: allFilters,
     orderBy,
-    limit,
-    offset
+    limit: limitVal,
+    offset: offsetVal
   };
 
   return JSON.stringify(result, null, 4);
