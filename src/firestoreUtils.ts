@@ -116,7 +116,8 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
             constraints.push(and([new PropertyFilter(key, '>=', condition['contains']), new PropertyFilter(key, '<=', condition['contains'] + '\uf8ff')]));
           }
           if ('exists' in condition) {
-            if (condition.exists === true) {
+            // FIXME: check if only boolean true is actually allowed or not
+            if (condition.exists === true || condition.exists === "true") {
               constraints.push(new PropertyFilter(key, '!=', null));
             } else {
               constraints.push(new PropertyFilter(key, '=', null));
