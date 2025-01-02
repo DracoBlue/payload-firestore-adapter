@@ -873,6 +873,9 @@ export function firestoreAdapter({
       init: async function (): Promise<void> {
         console.error('Function init not implemented.')
       },
+      destroy: async function (): Promise<void> {
+        console.error('Function destroy not implemented.')
+      },
     };
   }
 
