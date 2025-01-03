@@ -45,7 +45,7 @@ export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
 
     if (fetchKeysOnly) {
       for (let doc of rawDocs) {
-        docs.push({ key: doc[datastore.KEY]?.name });
+        docs.push({ key: doc[datastore.KEY] });
       }
     } else {
       for (let doc of rawDocs) {
