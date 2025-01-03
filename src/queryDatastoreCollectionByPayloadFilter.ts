@@ -3,9 +3,9 @@ import type { SanitizedCollectionConfig, Sort, TypeWithID } from 'payload';
 import { convertPayloadToFirestoreQuery } from './firestoreUtils';
 
 export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
-  datastore, collectionName, collectionConfig, payloadQuery, payloadSort, payloadLimit, page, pagination, fetchData = true, countData = true, fetchKeysOnly = false
+  datastore, collectionName, collectionConfig, payloadQuery, payloadSort, payloadLimit, page, pagination, fetchData = true, countData = true, fetchKeysOnly = false, skip,
 }: {
-  datastore: Datastore, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort, payloadLimit: number, page: number, pagination: boolean, fetchData?: boolean, fetchKeysOnly?: boolean, countData?: boolean
+  datastore: Datastore, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort, payloadLimit: number, page: number, pagination: boolean, fetchData?: boolean, fetchKeysOnly?: boolean, countData?: boolean, skip: number
 }) => {
   if (!payloadSort) {
     if (collectionConfig?.defaultSort) {
@@ -22,7 +22,7 @@ export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
   countQuery = countQuery.select('__key__');
   countQuery.orders = [];
 
-  let offset = page || 1 > 1 ? (payloadLimit || 0) * ((page || 1) - 1) : 0
+  let offset = (skip || 0) + (page || 1 > 1 ? (payloadLimit || 0) * ((page || 1) - 1) : 0)
 
   if (payloadLimit) {
     fetchQuery = fetchQuery.limit(payloadLimit);

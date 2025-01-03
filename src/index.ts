@@ -217,7 +217,8 @@ export function firestoreAdapter({
             payloadSort: [],
             countData: false,
             fetchData: true,
-            fetchKeysOnly: true
+            fetchKeysOnly: true,
+            skip: 0
           });
   
           let keys = result.docs.map((doc) => doc.key);
@@ -309,7 +310,8 @@ export function firestoreAdapter({
           page,
           pagination,
           payloadLimit,
-          payloadSort
+          payloadSort,
+          skip
         });
         console.log('fetched', collectionName, 'data', result.docs.length)
         return result;        
@@ -399,7 +401,7 @@ export function firestoreAdapter({
       }: FindVersionsArgs): Promise<PaginatedDocs<TypeWithVersion<T>>> {
         let versionCollectionName = nonVersionCollectionName + this.versionsSuffix
         
-        console.log('trying to find versions', versionCollectionName, {locale, versions, select})
+        console.log('trying to find versions', versionCollectionName, {locale, versions, select, skip, page})
 
         let collectionConfig = payload.collections[nonVersionCollectionName]?.config;
 
@@ -407,80 +409,24 @@ export function firestoreAdapter({
           collectionConfig = payload.globals.config.find((global) => global.slug === nonVersionCollectionName) as unknown as SanitizedCollectionConfig;
         }
 
-        if (!payloadSort) {
-          console.log('no sort given');
-          if (collectionConfig?.defaultSort) {
-            console.log('found defaultSort', collectionConfig);
-            payloadSort = collectionConfig?.defaultSort;
-          }
-        }
-
-        let firestoreQuery = convertPayloadToFirestoreQuery(
-          this.firestore as Datastore,
-          versionCollectionName,
+        let result = await queryDatastoreCollectionByPayloadFilter({
           collectionConfig,
-          payloadQuery ? payloadQuery : null,
+          datastore: this.firestore,
+          collectionName: versionCollectionName,
+          page,
+          pagination,
+          payloadLimit,
+          payloadQuery,
           payloadSort,
-        )
+          skip
+        });
 
-        let countQuery = convertPayloadToFirestoreQuery(
-          this.firestore as Datastore,
-          versionCollectionName,
-          collectionConfig,
-          payloadQuery ? payloadQuery : null,
-          null,
-        ).select('__key__').limit(-1).offset(-1);
-        countQuery.orders = [];
+        result.docs = result.docs.map((doc) => {
+          return {id: doc[this.firestore.KEY].name, ...doc}
+        });
 
-        logQuery('countQuery', countQuery);
-        let [totalDocsKeys] = await countQuery.run();
-        let totalDocsCount = totalDocsKeys.length;
-        console.log('counted!', totalDocsCount);
-
-        let offset = (skip || 0) + (page || 1 > 1 ? (payloadLimit || 0) * ((page || 1) - 1) : 0)
-
-        if (offset > 0) {
-          firestoreQuery = firestoreQuery.offset(offset);
-        }
-        if (payloadLimit) {
-          firestoreQuery = firestoreQuery.limit(payloadLimit);
-        }
-
-        logQuery('searching versions', firestoreQuery)
-
-        let docs = [];
-
-        if (totalDocsCount) {
-          let runQueryInfo = null;
-          [docs, runQueryInfo] = await firestoreQuery.run();
-        }
-
-        let dataItems = []
-
-        for (let doc of docs) {
-          let data = doc as TypeWithVersion<T>
-          dataItems.push({id: doc[this.firestore.KEY].name, ...data});
-        }
-        let { totalPages, nextPage, prevPage, pagingCounter, hasNextPage, hasPrevPage } =
-          calculatePageResultStatistics({
-            totalDocsCount,
-            payloadLimit: payloadLimit ? payloadLimit : 0,
-            page: page || 1,
-            pagination: pagination || false,
-          })
-        console.log('found versions', versionCollectionName, dataItems)
-        return {
-          docs: dataItems,
-          hasNextPage,
-          hasPrevPage,
-          limit: payloadLimit || 0,
-          pagingCounter,
-          totalDocs: totalDocsCount,
-          totalPages,
-          nextPage,
-          page: page || 1,
-          prevPage,
-        };
+        console.log('found versions', versionCollectionName, result.docs.length)
+        return result;
       },
       async queryDrafts<T = TypeWithID>({
         collection: nonVersionCollectionName,
@@ -491,7 +437,7 @@ export function firestoreAdapter({
         sort: payloadSort,
         select,
         where: payloadQuery,
-        joins,
+        joins
       }: QueryDraftsArgs): Promise<PaginatedDocs<T>> {
         const versionCollectionName = nonVersionCollectionName + this.versionsSuffix
         console.log('trying to find drafts', versionCollectionName, { joins, locale, select })
@@ -521,7 +467,8 @@ export function firestoreAdapter({
           page,
           pagination,
           payloadLimit,
-          payloadSort
+          payloadSort,
+          skip: 0
         });
 
         result.docs = result.docs.map((doc : TypeWithVersion<T>) => {
@@ -609,7 +556,8 @@ export function firestoreAdapter({
           payloadLimit: 0,
           payloadSort: [],
           countData: true,
-          fetchData: false
+          fetchData: false,
+          skip: 0
         });
         console.log('counted', collectionName, 'amount', result.totalDocs)
 
