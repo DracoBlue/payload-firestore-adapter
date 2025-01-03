@@ -29,10 +29,11 @@ import {
 
 import { Datastore } from '@google-cloud/datastore';
 
-import { convertPayloadToFirestoreQuery } from './firestoreUtils'
+import { calculatePageResultStatistics, convertPayloadToFirestoreQuery } from './firestoreUtils'
 import type { FirestoreAdapter } from './types'
 import { RunQueryInfo, RunQueryResponse } from '@google-cloud/datastore/build/src/query';
 import { queryDatastoreCollectionByPayloadFilter } from './queryDatastoreCollectionByPayloadFilter';
+import { logQuery } from './firestoreQueryJsonConverter';
 
 export function firestoreAdapter({
   defaultIDType = 'text',
@@ -311,7 +312,7 @@ export function firestoreAdapter({
           payloadSort
         });
         console.log('fetched', collectionName, 'data', result.docs.length)
-        return result;
+        return result;        
       },
       async findGlobalVersions<T = TypeWithID>({
         global: payloadGlobalName,
@@ -397,26 +398,89 @@ export function firestoreAdapter({
         where: payloadQuery,
       }: FindVersionsArgs): Promise<PaginatedDocs<TypeWithVersion<T>>> {
         let versionCollectionName = nonVersionCollectionName + this.versionsSuffix
-        console.log('trying to find versions', versionCollectionName, {locale, versions, select, payloadQuery, payloadSort});
+        
+        console.log('trying to find versions', versionCollectionName, {locale, versions, select})
 
         let collectionConfig = payload.collections[nonVersionCollectionName]?.config;
+
         if (!collectionConfig) {
           collectionConfig = payload.globals.config.find((global) => global.slug === nonVersionCollectionName) as unknown as SanitizedCollectionConfig;
         }
 
-        let result = await queryDatastoreCollectionByPayloadFilter<T>({
-          datastore: this.firestore as Datastore,
-          collectionName: versionCollectionName,
-          collectionConfig,
-          payloadQuery: payloadQuery ? payloadQuery : null,
-          page,
-          pagination,
-          payloadLimit,
-          payloadSort
-        });
-        console.log('found versions', versionCollectionName, 'data', result.docs.length);
+        if (!payloadSort) {
+          console.log('no sort given');
+          if (collectionConfig?.defaultSort) {
+            console.log('found defaultSort', collectionConfig);
+            payloadSort = collectionConfig?.defaultSort;
+          }
+        }
 
-        return result;
+        let firestoreQuery = convertPayloadToFirestoreQuery(
+          this.firestore as Datastore,
+          versionCollectionName,
+          collectionConfig,
+          payloadQuery ? payloadQuery : null,
+          payloadSort,
+        )
+
+        let countQuery = convertPayloadToFirestoreQuery(
+          this.firestore as Datastore,
+          versionCollectionName,
+          collectionConfig,
+          payloadQuery ? payloadQuery : null,
+          null,
+        ).select('__key__').limit(-1).offset(-1);
+        countQuery.orders = [];
+
+        logQuery('countQuery', countQuery);
+        let [totalDocsKeys] = await countQuery.run();
+        let totalDocsCount = totalDocsKeys.length;
+        console.log('counted!', totalDocsCount);
+
+        let offset = (skip || 0) + (page || 1 > 1 ? (payloadLimit || 0) * ((page || 1) - 1) : 0)
+
+        if (offset > 0) {
+          firestoreQuery = firestoreQuery.offset(offset);
+        }
+        if (payloadLimit) {
+          firestoreQuery = firestoreQuery.limit(payloadLimit);
+        }
+
+        logQuery('searching versions', firestoreQuery)
+
+        let docs = [];
+
+        if (totalDocsCount) {
+          let runQueryInfo = null;
+          [docs, runQueryInfo] = await firestoreQuery.run();
+        }
+
+        let dataItems = []
+
+        for (let doc of docs) {
+          let data = doc as TypeWithVersion<T>
+          dataItems.push({id: doc[this.firestore.KEY].name, ...data});
+        }
+        let { totalPages, nextPage, prevPage, pagingCounter, hasNextPage, hasPrevPage } =
+          calculatePageResultStatistics({
+            totalDocsCount,
+            payloadLimit: payloadLimit ? payloadLimit : 0,
+            page: page || 1,
+            pagination: pagination || false,
+          })
+        console.log('found versions', versionCollectionName, dataItems)
+        return {
+          docs: dataItems,
+          hasNextPage,
+          hasPrevPage,
+          limit: payloadLimit || 0,
+          pagingCounter,
+          totalDocs: totalDocsCount,
+          totalPages,
+          nextPage,
+          page: page || 1,
+          prevPage,
+        };
       },
       async queryDrafts<T = TypeWithID>({
         collection: nonVersionCollectionName,
