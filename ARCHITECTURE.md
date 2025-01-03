@@ -34,4 +34,37 @@ queries:
    filter results by all parts of the initial payload
    query and slice by offset/filter afterwards
 6. return the results
+
+## operators
+
+Some operators like "equals" are straight forward,
+but others need special treatment.
+
+### `exists` operator
+
+Is either `true` or `false`. It wants to return
+all documents, which have this specific field set.
+
+Explicit check:
+
+`exists: true`: It can be done in datastore mode of firestore by
+checking a `new PropertyFilter(key, "!=", null)`.
+`exists: false`: It can be done in datastore mode of firestore by
+checking a `new PropertyFilter(key, "==", null)`.
+
+Sideeffects:
+
+The datastore mode of firestore has two cases where
+the `!= null` is implied:
+
+* as soon as you order by this field
+* if it is part of an OR query
+
+Decision:
+
+1. if there is exists: true included in any but not all of the ORs -> offload to mingo
+2. if the field is sorted (but exists: false) -> offload to mingo
+
+
+
  
