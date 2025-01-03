@@ -11,7 +11,6 @@ type Filter = any;
  */
 export const convertPayloadToFirestoreQuery = function(datastore: Datastore, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort) {
   console.log('convertPayloadToFirestoreQuery', collectionName, JSON.stringify(payloadQuery, null, 4));
-  const existsFalseFieldIds = [];
 
   let fieldNameMapCache = null;
   let fillSubFieldNameMapCache = (fields, prefix) => {
@@ -37,8 +36,8 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
   const processQuery = (queryObj: Record<string, any>): Filter[] => {
     const constraints: Filter[] = [];
 
-    if (queryObj.and) {
-      queryObj.and.forEach((condition: any) => {
+    if (queryObj.and || queryObj.AND) {
+      (queryObj.and || queryObj.AND).forEach((condition: any) => {
         if (condition.or) {
           const orConditions = processQuery(condition);
           if (orConditions.length === 1) {
@@ -55,8 +54,8 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
           }
         }
       });
-    } else if (queryObj.or) {
-      const orConditions = queryObj.or.map((condition: any) => processQuery(condition));
+    } else if (queryObj.or || queryObj.OR) {
+      const orConditions = (queryObj.or || queryObj.OR).map((condition: any) => processQuery(condition));
       const flattenedConstraints = orConditions.flat() as Filter[];
       if (flattenedConstraints.length === 1) {
         constraints.push(flattenedConstraints[0]);
@@ -122,7 +121,6 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
               constraints.push(new PropertyFilter(key, '!=', null));
             } else {
               constraints.push(new PropertyFilter(key, '=', null));
-              existsFalseFieldIds.push(key);
             }
           }
         }
@@ -159,9 +157,7 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
   for (let payloadSortItem of payloadSort) {
     let payloadSortField = payloadSortItem.substr(0, 1) === '-' ? payloadSortItem.substr(1) : payloadSortItem;
     let payloadSortDirection = payloadSortItem.startsWith('-') ? 'desc' : 'asc';
-    if (existsFalseFieldIds.indexOf(payloadSortField) === -1) {
-      firestoreQuery = firestoreQuery.order(payloadSortField, {descending: payloadSortDirection === 'desc'});
-    }
+    firestoreQuery = firestoreQuery.order(payloadSortField, {descending: payloadSortDirection === 'desc'});
   }
 
 

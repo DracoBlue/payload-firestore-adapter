@@ -277,8 +277,10 @@ export function firestoreAdapter({
 
         let [docs] = await firestoreQuery.run();
         if (docs.length) {
-          console.log('delete versions')
-          await (this.firestore as Datastore).delete(docs.map((doc) => doc[this.firestore.KEY]));
+          console.log('delete versions', docs);
+          let keys = docs.map((doc) => doc[this.firestore.KEY]);
+          console.log('delete versions (keys)', keys);
+          await (this.firestore as Datastore).delete(keys);
           console.log('deleted versions')
         }
       },
@@ -395,7 +397,7 @@ export function firestoreAdapter({
         where: payloadQuery,
       }: FindVersionsArgs): Promise<PaginatedDocs<TypeWithVersion<T>>> {
         let versionCollectionName = nonVersionCollectionName + this.versionsSuffix
-        console.log('trying to find versions', versionCollectionName, {locale, versions, select});
+        console.log('trying to find versions', versionCollectionName, {locale, versions, select, payloadQuery, payloadSort});
 
         let collectionConfig = payload.collections[nonVersionCollectionName]?.config;
         if (!collectionConfig) {
