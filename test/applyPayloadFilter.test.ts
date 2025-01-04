@@ -160,6 +160,37 @@ describe('applyPayloadFilter', () => {
     });
   });
 
+  describe('like operator', () => {
+    test('matches substring with regex pattern', () => {
+      const entity = { description: 'This is an important announcement' };
+      const query = { description: { like: 'important' } };
+      expect(applyPayloadFilter(entity, query)).toBe(true);
+    });
+  
+    test('matches with regex pattern containing special characters', () => {
+      const entity = { description: 'Error: Code 404' };
+      const query = { description: { like: 'Code \\d+' } }; // Match 'Code' followed by digits
+      expect(applyPayloadFilter(entity, query)).toBe(true);
+    });
+  
+    test('is case-insensitive', () => {
+      const entity = { description: 'Hello World' };
+      const query = { description: { like: 'hello' } };
+      expect(applyPayloadFilter(entity, query)).toBe(true);
+    });
+  
+    test('does not match non-existing substring', () => {
+      const entity = { description: 'This is just a test' };
+      const query = { description: { like: 'important' } };
+      expect(applyPayloadFilter(entity, query)).toBe(false);
+    });
+  
+    test('matches complex regex pattern', () => {
+      const entity = { description: '2024-12-31' };
+      const query = { description: { like: '^2024-\\d{2}-\\d{2}$' } };
+      expect(applyPayloadFilter(entity, query)).toBe(true);
+    });
+  });
 
   test('Handles nested and/or conditions', () => {
     const entity = { status: "active", timestamp: new Date("2024-12-31T23:59:59Z") };

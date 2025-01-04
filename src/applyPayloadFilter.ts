@@ -55,18 +55,12 @@ function transformToMingoQuery(query) {
     // String Operators
     else if (condition.contains !== undefined) {
       result[key] = { $regex: condition.contains, $options: 'i' }; // Case-insensitive regex
-    } else if (condition.starts_with !== undefined) {
-      result[key] = { $regex: `^${condition.starts_with}`, $options: 'i' }; // Case-insensitive prefix match
-    } else if (condition.ends_with !== undefined) {
-      result[key] = { $regex: `${condition.ends_with}$`, $options: 'i' }; // Case-insensitive suffix match
+    } else if (condition.like !== undefined) {
+      result[key] = { $regex: condition.like, $options: 'i' }; // General pattern match
     }
 
-    // Null Operators
-    else if (condition.is_null === true) {
-      result[key] = null;
-    } else if (condition.is_not_null === true) {
-      result[key] = { $ne: null };
-    }
+    // Point Operators
+    // FIXME within, intersects, near
 
     // Range Operators
     else if (condition.between !== undefined && Array.isArray(condition.between) && condition.between.length === 2) {
