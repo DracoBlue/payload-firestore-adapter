@@ -1,45 +1,76 @@
 import { Query } from "mingo";
 
-/**
- * Applies a Payload CMS query to filter an entity using Mingo.
- * @param {Object} entity - The entity to filter.
- * @param {Object} query - The Payload CMS query to apply.
- * @returns {boolean} - Whether the entity matches the query.
- */
 export const applyPayloadFilter = (entity, query) => {
-  // Transform Payload CMS query to Mingo-compatible syntax
   const mingoQuery = transformToMingoQuery(query);
-
-  // Use Mingo's Query to evaluate the entity
   const mingo = new Query(mingoQuery);
   return mingo.test(entity);
 }
 
-/**
- * Transforms Payload CMS query syntax into Mingo-compatible query syntax.
- * @param {Object} query - The Payload CMS query.
- * @returns {Object} - The transformed query for Mingo.
- */
+
 function transformToMingoQuery(query) {
   const result = {};
 
   for (const key in query) {
     const condition = query[key];
 
+    // Logical Operators
     if (key === 'and') {
       result['$and'] = condition.map(transformToMingoQuery);
     } else if (key === 'or') {
       result['$or'] = condition.map(transformToMingoQuery);
+    }
+
+    // Comparison Operators
+    else if (condition.equals !== undefined) {
+      result[key] = condition.equals;
+    } else if (condition.not_equals !== undefined) {
+      result[key] = { $ne: condition.not_equals };
+      // FIXME: handle non-date values
+    } else if (condition.greater_than !== undefined) {
+      result[key] = { $gt: new Date(condition.greater_than) };
+    } else if (condition.greater_than_equal !== undefined) {
+      result[key] = { $gte: new Date(condition.greater_than_equal) };
+    } else if (condition.less_than !== undefined) {
+      result[key] = { $lt: new Date(condition.less_than) };
+    } else if (condition.less_than_equal !== undefined) {
+      result[key] = { $lte: new Date(condition.less_than_equal) };
+    }
+
+    // Array Operators
+    else if (condition.in !== undefined) {
+      result[key] = { $in: condition.in };
+    } else if (condition.not_in !== undefined) {
+      result[key] = { $nin: condition.not_in };
+    } else if (condition.all !== undefined) {
+      result[key] = { $all: condition.all };
+    }
+
+    // Existence Operators
+    else if (condition.exists === true) {
+      result[key] = { $exists: true };
     } else if (condition.exists === false) {
       result[key] = { $exists: false };
-    } else if (condition.exists === true) {
-      result[key] = { $exists: true };
-    } else if (condition.less_than) {
-      result[key] = { $lt: new Date(condition.less_than) };
-    } else if (condition.greater_than) {
-      result[key] = { $gt: new Date(condition.greater_than) };
-    } else if (condition.equals) {
-      result[key] = condition.equals;
+    }
+
+    // String Operators
+    else if (condition.contains !== undefined) {
+      result[key] = { $regex: condition.contains, $options: 'i' }; // Case-insensitive regex
+    } else if (condition.starts_with !== undefined) {
+      result[key] = { $regex: `^${condition.starts_with}`, $options: 'i' }; // Case-insensitive prefix match
+    } else if (condition.ends_with !== undefined) {
+      result[key] = { $regex: `${condition.ends_with}$`, $options: 'i' }; // Case-insensitive suffix match
+    }
+
+    // Null Operators
+    else if (condition.is_null === true) {
+      result[key] = null;
+    } else if (condition.is_not_null === true) {
+      result[key] = { $ne: null };
+    }
+
+    // Range Operators
+    else if (condition.between !== undefined && Array.isArray(condition.between) && condition.between.length === 2) {
+      result[key] = { $gte: condition.between[0], $lte: condition.between[1] };
     }
   }
 
