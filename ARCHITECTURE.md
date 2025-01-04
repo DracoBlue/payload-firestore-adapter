@@ -58,8 +58,6 @@ but others need special treatment.
 | `intersects`             | Filters documents based on whether geolocation fields intersect with a given area defined in GeoJSON.| ❌ Not Supported | Fully handled by Mingo |
 | `near`                   | Finds documents with geolocation fields near a specified point.                  | ❌ Not Supported            | Fully handled by Mingo              |
 
-**Notes:**
-
 If the operator has **Firestore Compatibility**, it indicates whether the operator is natively supported in Firestore's Datastore mode. The **Special Cases Handled by Mingo** describes
 scenarios where Mingo is utilized to handle specific cases that Firestore cannot process directly.
 
