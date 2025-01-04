@@ -36,8 +36,8 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
   const processQuery = (queryObj: Record<string, any>): Filter[] => {
     const constraints: Filter[] = [];
 
-    if (queryObj.and) {
-      queryObj.and.forEach((condition: any) => {
+    if (queryObj.and || queryObj.AND) {
+      (queryObj.and || queryObj.AND).forEach((condition: any) => {
         if (condition.or) {
           const orConditions = processQuery(condition);
           if (orConditions.length === 1) {
@@ -54,8 +54,8 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
           }
         }
       });
-    } else if (queryObj.or) {
-      const orConditions = queryObj.or.map((condition: any) => processQuery(condition));
+    } else if (queryObj.or || queryObj.OR) {
+      const orConditions = (queryObj.or || queryObj.OR).map((condition: any) => processQuery(condition));
       const flattenedConstraints = orConditions.flat() as Filter[];
       if (flattenedConstraints.length === 1) {
         constraints.push(flattenedConstraints[0]);
@@ -163,27 +163,3 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
 
   return firestoreQuery;
 }
-
-export const calculatePageResultStatistics = ({
-    totalDocsCount, payloadLimit = 0, page = 1, pagination
-}: {totalDocsCount: number, payloadLimit: number, page: number, pagination: boolean}) : {totalPages: number, prevPage: number | null, nextPage: number | null, pagingCounter: number, hasNextPage: boolean, hasPrevPage: boolean} => {
-    if (payloadLimit === 0) {
-        return {
-            totalPages: 1,
-            hasNextPage: false,
-            hasPrevPage: false,
-            prevPage: null,
-            nextPage: null,
-            pagingCounter: 1
-        };
-    }
-    let totalPages = Math.ceil(totalDocsCount / payloadLimit);
-    return {
-        totalPages,
-        pagingCounter: page,
-        nextPage: page < totalPages ? page + 1 : null,
-        hasNextPage: page < totalPages,
-        prevPage: page !== 1 ? page - 1 : null,
-        hasPrevPage: page !== 1
-    }
-};
