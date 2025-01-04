@@ -163,27 +163,3 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
 
   return firestoreQuery;
 }
-
-export const calculatePageResultStatistics = ({
-    totalDocsCount, payloadLimit = 0, page = 1, pagination
-}: {totalDocsCount: number, payloadLimit: number, page: number, pagination: boolean}) : {totalPages: number, prevPage: number | null, nextPage: number | null, pagingCounter: number, hasNextPage: boolean, hasPrevPage: boolean} => {
-    if (payloadLimit === 0) {
-        return {
-            totalPages: 1,
-            hasNextPage: false,
-            hasPrevPage: false,
-            prevPage: null,
-            nextPage: null,
-            pagingCounter: 1
-        };
-    }
-    let totalPages = Math.ceil(totalDocsCount / payloadLimit);
-    return {
-        totalPages,
-        pagingCounter: page,
-        nextPage: page < totalPages ? page + 1 : null,
-        hasNextPage: page < totalPages,
-        prevPage: page !== 1 ? page - 1 : null,
-        hasPrevPage: page !== 1
-    }
-};

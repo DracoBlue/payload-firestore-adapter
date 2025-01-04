@@ -29,7 +29,7 @@ import {
 
 import { Datastore } from '@google-cloud/datastore';
 
-import { calculatePageResultStatistics, convertPayloadToFirestoreQuery } from './firestoreUtils'
+import { convertPayloadToFirestoreQuery } from './convertPayloadToFirestoreQuery'
 import type { FirestoreAdapter } from './types'
 import { RunQueryInfo, RunQueryResponse } from '@google-cloud/datastore/build/src/query';
 import { queryDatastoreCollectionByPayloadFilter } from './queryDatastoreCollectionByPayloadFilter';

@@ -1,6 +1,6 @@
 import type { Datastore } from '@google-cloud/datastore';
 import type { SanitizedCollectionConfig, Sort, TypeWithID } from 'payload';
-import { convertPayloadToFirestoreQuery } from './firestoreUtils';
+import { convertPayloadToFirestoreQuery } from './convertPayloadToFirestoreQuery';
 
 export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
   datastore, collectionName, collectionConfig, payloadQuery, payloadSort, payloadLimit, page, pagination, fetchData = true, countData = true, fetchKeysOnly = false, skip,

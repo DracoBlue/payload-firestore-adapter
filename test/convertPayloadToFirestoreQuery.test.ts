@@ -1,6 +1,6 @@
 import { Datastore, or, and, PropertyFilter, Query } from '@google-cloud/datastore';
 import { generateQueryJson } from "./../src/firestoreQueryJsonConverter";
-import { convertPayloadToFirestoreQuery } from "./../src/firestoreUtils";
+import { convertPayloadToFirestoreQuery } from "./../src/convertPayloadToFirestoreQuery";
 import { Field, SanitizedCollectionConfig, Where } from "payload";
 
 const datastore = new Datastore({
