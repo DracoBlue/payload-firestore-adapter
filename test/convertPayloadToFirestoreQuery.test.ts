@@ -54,7 +54,7 @@ describe("convertPayloadToFirestoreQuery", () => {
         };
 
         let [resultingQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
-
+        expect(hasNodeConditions).toBe(false);
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "kinds": ["testcollection"],
             "filters": [
@@ -88,6 +88,7 @@ describe("convertPayloadToFirestoreQuery", () => {
         };
 
         let [resultingQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereTwo) as unknown as any;
+        expect(hasNodeConditions).toBe(false);
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "kinds": ["testcollection"],
             "filters": [
@@ -145,7 +146,7 @@ describe("convertPayloadToFirestoreQuery", () => {
         };
 
         let [resultingQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereThree) as unknown as any;
-        
+        expect(hasNodeConditions).toBe(false);
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "kinds": ["testcollection"],
             "filters": [
@@ -211,34 +212,14 @@ describe("convertPayloadToFirestoreQuery", () => {
         };
 
         let [resultingQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereFour) as unknown as any;
-
+        expect(hasNodeConditions).toBe(true);
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "kinds": ["testcollection"],
             "filters": [
                 {
-                    "filters": [
-                        {
-                            "filters": [
-                                {
-                                    "field": "_status",
-                                    "operator": '=',
-                                    "value": "published"
-                                },
-                                {
-                                    "field": "_status",
-                                    "operator": '=',
-                                    "value": null
-                                }
-                            ],
-                            "operator": "OR"
-                        },
-                        {
-                            "field": "id",
-                            "operator": '=',
-                            "value": "935ae00f-91c6-4a91-8b0f-8c4ed4c04894"
-                        }
-                    ],
-                    "operator": "AND"
+                    "field": "id",
+                    "operator": '=',
+                    "value": "935ae00f-91c6-4a91-8b0f-8c4ed4c04894"
                 }
             ],
             "orderBy": [
@@ -275,25 +256,10 @@ describe("convertPayloadToFirestoreQuery", () => {
         };
 
         let [resultingQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereFour) as unknown as any;
+        expect(hasNodeConditions).toBe(true);
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "kinds": ["testcollection"],
-            "filters": [
-                {
-                    "filters": [
-                        {
-                            "field": "title",
-                            "operator": ">=",
-                            "value": "title#2"
-                        },
-                        {
-                            "field": "title",
-                            "operator": "<=",
-                            "value": "title#2"
-                        }
-                    ],
-                    "operator": "AND"
-                }
-            ],
+            "filters": [],
             "orderBy": [
                 {
                     "field": "id",
@@ -317,8 +283,7 @@ describe("convertPayloadToFirestoreQuery", () => {
         };
 
         let [resultingQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
-        console.log(generateQueryJson(resultingQuery));
-
+        expect(hasNodeConditions).toBe(false);
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "kinds": ["testcollection"],
             "filters": [
@@ -350,7 +315,7 @@ describe("convertPayloadToFirestoreQuery", () => {
         };
 
         let [resultingQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastore, collectionName, sanitizedCollectionConfig, whereOne) as unknown as any;
-
+        expect(hasNodeConditions).toBe(false);
         expect(JSON.parse(generateQueryJson(resultingQuery))).toStrictEqual({
             "kinds": ["testcollection"],
             "filters": [
