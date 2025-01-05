@@ -527,6 +527,7 @@ export function firestoreAdapter({
         await (this.firestore as Datastore).update({
           key: (this.firestore as Datastore).key([collectionName, id]),
           data: {
+            id,
             ...data
           },
         })
