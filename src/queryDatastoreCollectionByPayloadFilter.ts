@@ -14,12 +14,12 @@ export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
     }
   }
 
-  let fetchQuery = convertPayloadToFirestoreQuery(datastore, collectionName, collectionConfig, payloadQuery, payloadSort);
+  let [fetchQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastore, collectionName, collectionConfig, payloadQuery, payloadSort);
   if (fetchKeysOnly) {
     fetchQuery = fetchQuery.select('__key__');
   }
 
-  let countQuery = convertPayloadToFirestoreQuery(datastore, collectionName, collectionConfig, payloadQuery, []);
+  let [countQuery] = convertPayloadToFirestoreQuery(datastore, collectionName, collectionConfig, payloadQuery, []);
   countQuery = countQuery.select('__key__');
   countQuery.orders = [];
 

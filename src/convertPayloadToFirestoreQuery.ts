@@ -3,13 +3,7 @@ import type { Field, SanitizedCollectionConfig, Sort } from 'payload';
 
 type Filter = any;
 
-/**
- * Converts Payload CMS query JSON to Firestore query constraints.
- * @param {string} collectionName - The Firestore collection name.
- * @param {Object} payloadQuery - The Payload CMS query JSON.
- * @returns {Query} - Firestore query.
- */
-export const convertPayloadToFirestoreQuery = function(datastore: Datastore, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort) {
+export const convertPayloadToFirestoreQuery = function(datastore: Datastore, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort): [Query, boolean] {
   console.log('convertPayloadToFirestoreQuery', collectionName, JSON.stringify(payloadQuery, null, 4));
 
   let fieldNameMapCache = null;
@@ -33,20 +27,29 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
     return fieldNameMapCache[name] || {};
   }
 
-  const processQuery = (queryObj: Record<string, any>): Filter[] => {
+  const processQuery = (queryObj: Record<string, any>): [Filter[], boolean] => {
     const constraints: Filter[] = [];
+    let hasQueryNodeConditions = false;
 
     if (queryObj.and || queryObj.AND) {
-      (queryObj.and || queryObj.AND).forEach((condition: any) => {
+      (queryObj.and || queryObj.AND).forEach((condition: any) => {
         if (condition.or) {
-          const orConditions = processQuery(condition);
-          if (orConditions.length === 1) {
-            constraints.push(orConditions[0]);
-          } else if (orConditions.length > 1) {
-            constraints.push(or(orConditions));
+          const [orConditions, hasSubQueryNodeConditions] = processQuery(condition);
+          hasQueryNodeConditions = hasQueryNodeConditions || hasSubQueryNodeConditions;
+
+          if (hasSubQueryNodeConditions) {
+            /* We cannot use any of the orConditions - since there is non datastore query stuff included. */
+          } else {
+            if (orConditions.length === 1) {
+              constraints.push(orConditions[0]);
+            } else if (orConditions.length > 1) {
+              constraints.push(or(orConditions));
+            }
           }
         } else {
-          const andConditions = processQuery(condition);
+          const [andConditions, hasSubQueryNodeConditions]  = processQuery(condition);
+          hasQueryNodeConditions = hasQueryNodeConditions || hasSubQueryNodeConditions;
+
           if (andConditions.length === 1) {
             constraints.push(andConditions[0]);
           } else if (andConditions.length > 1) {
@@ -55,12 +58,23 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
         }
       });
     } else if (queryObj.or || queryObj.OR) {
-      const orConditions = (queryObj.or || queryObj.OR).map((condition: any) => processQuery(condition));
-      const flattenedConstraints = orConditions.flat() as Filter[];
-      if (flattenedConstraints.length === 1) {
-        constraints.push(flattenedConstraints[0]);
-      } else if (flattenedConstraints.length > 1) {
-        constraints.push(or(flattenedConstraints));
+      let orConditionsHasNodeConditions = false;
+      const orConditions = (queryObj.or || queryObj.OR).map((condition: any) => {
+        let [subQueryConditions, hasSubQueryNodeConditions] = processQuery(condition);
+        orConditionsHasNodeConditions = orConditionsHasNodeConditions || hasSubQueryNodeConditions;
+        return subQueryConditions;
+      });
+      hasQueryNodeConditions = hasQueryNodeConditions || orConditionsHasNodeConditions;
+
+      if (orConditionsHasNodeConditions) {
+            /* We cannot use any of the orConditions - since there is non datastore query stuff included. */
+      } else {
+        const flattenedConstraints = orConditions.flat() as Filter[];
+        if (flattenedConstraints.length === 1) {
+          constraints.push(flattenedConstraints[0]);
+        } else if (flattenedConstraints.length > 1) {
+          constraints.push(or(flattenedConstraints));
+        }
       }
     } else {
       for (const key in queryObj) {
@@ -109,37 +123,53 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
           }
           // FIXME: like does not exist, but we use https://stackoverflow.com/a/75877483 as a workaround (prefix search)
           if ('like' in condition) {
-            constraints.push(and([new PropertyFilter(key, '>=', condition['like']), new PropertyFilter(key, '<=', condition['like'] + '\uf8ff')]));
+            /* 
+               There is no like search in datastore. The workaround was a prefix search, which we removed here.
+               
+               Removed: constraints.push(and([new PropertyFilter(key, '>=', condition['like']), new PropertyFilter(key, '<=', condition['like'] + '\uf8ff')]));
+            */
+            hasQueryNodeConditions = true;
           }
           // FIXME: contains does not exist, but we use https://stackoverflow.com/a/75877483 as a workaround (prefix search)
           if ('contains' in condition) {
-            constraints.push(and([new PropertyFilter(key, '>=', condition['contains']), new PropertyFilter(key, '<=', condition['contains'] + '\uf8ff')]));
+            /* 
+               There is no contains in strings in datastore. The workaround was a prefix search, which we removed here.
+               
+               Removed: constraints.push(and([new PropertyFilter(key, '>=', condition['like']), new PropertyFilter(key, '<=', condition['like'] + '\uf8ff')]));
+            */
+               hasQueryNodeConditions = true;
           }
           if ('exists' in condition) {
             // FIXME: check if only boolean true is actually allowed or not
             if (condition.exists === true || condition.exists === "true") {
               constraints.push(new PropertyFilter(key, '!=', null));
             } else {
-              constraints.push(new PropertyFilter(key, '=', null));
+              /* 
+                 The sideffect is, if the `= null` check is used to check for non-existant and
+                 any other field filters for this, too - it won't work.
+
+                 Removed: constraints.push(new PropertyFilter(key, '=', null));
+              */
+              hasQueryNodeConditions = true;
+              
             }
           }
         }
       }
     }
 
-    return constraints;
+    return [constraints, hasQueryNodeConditions];
   };
 
 
 
-  let firestoreQuery = datastore.createQuery(collectionName).limit(0);
-  firestoreQuery = firestoreQuery.filter('latest', '=', true);
+  let hasNodeConditions = false;
+  let firestoreQuery = datastore.createQuery(collectionName);
   
   if (payloadQuery) {
-    const firestoreConstraints = processQuery(payloadQuery);
-    if (firestoreConstraints.length === 0) {
-      firestoreQuery = datastore.createQuery(collectionName);
-    } else {
+    const [firestoreConstraints, hasSubQueryNodeConditions] = processQuery(payloadQuery);
+    hasNodeConditions = hasNodeConditions || hasSubQueryNodeConditions;
+    if (firestoreConstraints.length !== 0) {
       const compositeFilter = firestoreConstraints.length === 1 ? firestoreConstraints[0] : and(firestoreConstraints);
       firestoreQuery = datastore.createQuery(collectionName).filter(compositeFilter);
     }
@@ -160,6 +190,7 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
     firestoreQuery = firestoreQuery.order(payloadSortField, {descending: payloadSortDirection === 'desc'});
   }
 
+  console.log('convertPayloadToFirestoreQuery:result', JSON.stringify([].concat(...firestoreQuery.entityFilters).concat(...firestoreQuery.filters), null, 4));
 
-  return firestoreQuery;
+  return [firestoreQuery, hasNodeConditions];
 }
