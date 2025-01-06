@@ -1,6 +1,7 @@
 import type { Datastore } from '@google-cloud/datastore';
 import type { SanitizedCollectionConfig, Sort, TypeWithID } from 'payload';
 import { convertPayloadToFirestoreQuery } from './convertPayloadToFirestoreQuery';
+import { applyPayloadFilter } from './applyPayloadFilter';
 
 export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
   datastore, collectionName, collectionConfig, payloadQuery, payloadSort, payloadLimit, page, pagination, fetchData = true, countData = true, fetchKeysOnly = false, skip,
@@ -13,12 +14,12 @@ export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
     }
   }
 
-  let fetchQuery = convertPayloadToFirestoreQuery(datastore, collectionName, collectionConfig, payloadQuery, payloadSort);
+  let [fetchQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastore, collectionName, collectionConfig, payloadQuery, payloadSort);
   if (fetchKeysOnly) {
     fetchQuery = fetchQuery.select('__key__');
   }
 
-  let countQuery = convertPayloadToFirestoreQuery(datastore, collectionName, collectionConfig, payloadQuery, []);
+  let [countQuery] = convertPayloadToFirestoreQuery(datastore, collectionName, collectionConfig, payloadQuery, []);
   countQuery = countQuery.select('__key__');
   countQuery.orders = [];
 
@@ -42,6 +43,8 @@ export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
 
   if (fetchData) {
     let [rawDocs, runQueryInfo] = await fetchQuery.run();
+
+    rawDocs = rawDocs.filter(rawDoc => applyPayloadFilter(rawDoc, payloadQuery));
 
     if (fetchKeysOnly) {
       for (let doc of rawDocs) {

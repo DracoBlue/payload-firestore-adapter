@@ -240,12 +240,13 @@ export function firestoreAdapter({
         let collectionConfig = payload.collections[collectionName]?.config;
 
         // FIXME: maybe we can optimize if we search for just "one" item by id
-        let firestoreQuery = convertPayloadToFirestoreQuery(
+        let [firestoreQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(
           this.firestore as Datastore,
           collectionName,
           collectionConfig,
           payloadWhereQuery ? payloadWhereQuery : null,
-        ).select('__key__').limit(1);
+        );
+        firestoreQuery = firestoreQuery.select('__key__').limit(1);
 
         let [docs, runQueryInfo] : [any[], RunQueryInfo] = await firestoreQuery.run();
         let doc = docs[0];
@@ -270,7 +271,7 @@ export function firestoreAdapter({
         }
 
         // FIXME: maybe we can optimize if we search for just "one" item by id
-        let firestoreQuery = convertPayloadToFirestoreQuery(
+        let [firestoreQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(
           this.firestore as Datastore,
           versionCollectionName,
           collectionConfig,
@@ -371,13 +372,15 @@ export function firestoreAdapter({
           collectionConfig = payload.globals.config.find((global) => global.slug === nonVersionCollectionName) as unknown as SanitizedCollectionConfig;
         }
 
-        let countQuery = convertPayloadToFirestoreQuery(
+        let [countQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(
           this.firestore as Datastore,
           versionCollectionName,
           collectionConfig,
           payloadWhereQuery ? payloadWhereQuery : null,
           null,
-        ).select('__key__').limit(-1).offset(-1);
+        );
+        // FIXME: hasNodeConditions - means we need to filter in nodejs!
+        countQuery.select('__key__').limit(-1).offset(-1);
         countQuery.orders = [];
         
         let [totalDocsKeys] = await countQuery.run();
@@ -616,21 +619,27 @@ export function firestoreAdapter({
         console.log('fetch one', payloadCollectionName, 'where', payloadWhereQuery, 'and', {joins, locale, select })
 
         let collectionConfig = payload.collections[payloadCollectionName]?.config;
+        let hasNodeConditions = false;
 
         // FIXME: maybe we can optimize if we search for just "one" item by id
         if (payloadWhereQuery) {
-          firestoreQuery = convertPayloadToFirestoreQuery(
+          [firestoreQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(
             this.firestore as Datastore,
             payloadCollectionName,
             collectionConfig,
             payloadWhereQuery,
           )
+          // FIXME: if hasNodeConditions the limit 1 is not possible before filtering in nodejs´
           firestoreQuery = firestoreQuery.limit(1);
         }
 
         let [docs] = await firestoreQuery.run();
         // FIXME: ended (e.g. by using getDoc and ID reference)
         if (!docs[0]) {
+          console.log('did not find one', payloadCollectionName, 'data', {hasNodeConditions});
+          let [allRows] = await (this.firestore.createQuery(payloadCollectionName).run());
+          console.log(' all rows are', allRows);
+
           return null
         }
         console.log('fetched ', payloadCollectionName, 'data', docs[0])
