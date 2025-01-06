@@ -1,9 +1,9 @@
-import { Datastore, Query, or, and, PropertyFilter } from '@google-cloud/datastore';
+import { Query, or, and, PropertyFilter, DatastoreRequest } from '@google-cloud/datastore';
 import type { Field, SanitizedCollectionConfig, Sort } from 'payload';
 
 type Filter = any;
 
-export const convertPayloadToFirestoreQuery = function(datastore: Datastore, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort): [Query, boolean] {
+export const convertPayloadToFirestoreQuery = function(datastoreRequest: DatastoreRequest, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort): [Query, boolean] {
   console.log('convertPayloadToFirestoreQuery', collectionName, JSON.stringify(payloadQuery, null, 4));
 
   let fieldNameMapCache = null;
@@ -164,14 +164,14 @@ export const convertPayloadToFirestoreQuery = function(datastore: Datastore, col
 
 
   let hasNodeConditions = false;
-  let firestoreQuery = datastore.createQuery(collectionName);
+  let firestoreQuery = datastoreRequest.createQuery(collectionName);
   
   if (payloadQuery) {
     const [firestoreConstraints, hasSubQueryNodeConditions] = processQuery(payloadQuery);
     hasNodeConditions = hasNodeConditions || hasSubQueryNodeConditions;
     if (firestoreConstraints.length !== 0) {
       const compositeFilter = firestoreConstraints.length === 1 ? firestoreConstraints[0] : and(firestoreConstraints);
-      firestoreQuery = datastore.createQuery(collectionName).filter(compositeFilter);
+      firestoreQuery = datastoreRequest.createQuery(collectionName).filter(compositeFilter);
     }
   }
 
