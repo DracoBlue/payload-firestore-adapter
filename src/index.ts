@@ -691,7 +691,7 @@ export function firestoreAdapter({
 
         throw new Error('Function rollbackTransaction not implemented.')
       },
-      upsert: function ({
+      upsert: async function ({
         collection: payloadCollectionName,
         where: payloadWhereQuery,
         data,
@@ -700,9 +700,34 @@ export function firestoreAdapter({
         select,
         locale,
       }: any): Promise<Document> {
-        return this.updateOne({
+        let id = data?.id;
+        if (!id) {
+          let existingDoc = await this.findOne({
+            collection: payloadCollectionName,
+            where: payloadWhereQuery,
+            select,
+            locale,
+            req,
+            joins,    
+          });
+          if (existingDoc) {
+            id = existingDoc.id;
+          }
+        }
+        if (!id) {
+          return await this.create({
+            collection: payloadCollectionName,
+            data,
+            draft: false,
+            select,
+            locale,
+            req
+          });
+        }
+        return await this.updateOne({
           collection: payloadCollectionName,
           data,
+          id,
           req,
           joins,
           select,
