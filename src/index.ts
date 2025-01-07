@@ -324,6 +324,7 @@ export function firestoreAdapter({
           pagination,
           payloadLimit,
           payloadSort,
+          locale,
           skip
         });
         console.log('fetched', collectionName, 'data', result.docs.length)

@@ -1,31 +1,11 @@
 import { Query, or, and, PropertyFilter, DatastoreRequest } from '@google-cloud/datastore';
 import type { Field, SanitizedCollectionConfig, Sort } from 'payload';
+import { getFieldConfigByName } from './getfieldNameConfig';
 
 type Filter = any;
 
-export const convertPayloadToFirestoreQuery = function(datastoreRequest: DatastoreRequest, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort): [Query, boolean] {
-  console.log('convertPayloadToFirestoreQuery', collectionName, JSON.stringify(payloadQuery, null, 4));
-
-  let fieldNameMapCache = null;
-  let fillSubFieldNameMapCache = (fields, prefix) => {
-    for (let field of fields as Field[]) {
-      fieldNameMapCache[prefix + (field as any).name] = field;
-      if (field.type === "array") {
-        fillSubFieldNameMapCache(field.fields, prefix + (field as any).name + ".");
-      }
-      if (field.type === "group") {
-        fillSubFieldNameMapCache(field.fields, prefix + (field as any).name + ".");
-      }
-    }
-  }
-
-  let getFieldConfigByName = (name, fields) => {
-    if (fieldNameMapCache === null) {
-      fieldNameMapCache = {}
-      fillSubFieldNameMapCache(fields, "");
-    }
-    return fieldNameMapCache[name] || {};
-  }
+export const convertPayloadToFirestoreQuery = function(datastoreRequest: DatastoreRequest, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort, locale?: string): [Query, boolean] {
+  console.log('convertPayloadToFirestoreQuery', collectionName, {locale, payloadSort}, JSON.stringify(payloadQuery, null, 4));
 
   const processQuery = (queryObj: Record<string, any>): [Filter[], boolean] => {
     const constraints: Filter[] = [];
@@ -79,7 +59,12 @@ export const convertPayloadToFirestoreQuery = function(datastoreRequest: Datasto
     } else {
       for (const key in queryObj) {
         const condition = queryObj[key];
-        if (typeof condition === 'string' || typeof condition === 'number') {
+        let fieldConfig = getFieldConfigByName(key, collectionConfig.flattenedFields);
+        
+        if (fieldConfig.localized && locale) {
+          console.log('field is localized', {key, locale});
+          hasQueryNodeConditions = true;
+        } else if (typeof condition === 'string' || typeof condition === 'number') {
           constraints.push(new PropertyFilter(key, '=', condition));
         } else if (typeof condition === 'object') {
           if ("greater_than" in condition) {
@@ -95,7 +80,7 @@ export const convertPayloadToFirestoreQuery = function(datastoreRequest: Datasto
             constraints.push(new PropertyFilter(key, '<=', condition['less_than_equal']));
           }
           if ('equals' in condition) {
-            if (getFieldConfigByName(key, collectionConfig.fields).hasMany) {
+            if (fieldConfig.hasMany) {
               // FIXME: check if it works
               constraints.push(new PropertyFilter(key, '=', condition['equals']));
             } else {
@@ -107,7 +92,7 @@ export const convertPayloadToFirestoreQuery = function(datastoreRequest: Datasto
           }
           if ('in' in condition) {
             if (condition['in'].length) {
-              if (getFieldConfigByName(key, collectionConfig.fields).hasMany) {
+              if (fieldConfig.hasMany) {
                 // FIXME: check if it works
                 constraints.push(new PropertyFilter(key, 'IN', condition['in']));
               } else {

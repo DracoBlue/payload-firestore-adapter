@@ -4,9 +4,9 @@ import { convertPayloadToFirestoreQuery } from './convertPayloadToFirestoreQuery
 import { applyPayloadFilter } from './applyPayloadFilter';
 
 export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
-  datastoreRequest, collectionName, collectionConfig, payloadQuery, payloadSort, payloadLimit, page, pagination, fetchData = true, countData = true, fetchKeysOnly = false, skip,
+  datastoreRequest, collectionName, collectionConfig, payloadQuery, payloadSort, payloadLimit, page, pagination, fetchData = true, countData = true, fetchKeysOnly = false, skip, locale
 }: {
-  datastoreRequest: DatastoreRequest, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort, payloadLimit: number, page: number, pagination: boolean, fetchData?: boolean, fetchKeysOnly?: boolean, countData?: boolean, skip: number
+  datastoreRequest: DatastoreRequest, collectionName: string, collectionConfig: SanitizedCollectionConfig, payloadQuery: Record<string, any>, payloadSort?: Sort, payloadLimit: number, page: number, pagination: boolean, fetchData?: boolean, fetchKeysOnly?: boolean, countData?: boolean, skip: number, locale?: string
 }) => {
   if (!payloadSort) {
     if (collectionConfig?.defaultSort) {
@@ -14,12 +14,12 @@ export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
     }
   }
 
-  let [fetchQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastoreRequest, collectionName, collectionConfig, payloadQuery, payloadSort);
+  let [fetchQuery, hasNodeConditions] = convertPayloadToFirestoreQuery(datastoreRequest, collectionName, collectionConfig, payloadQuery, payloadSort, locale);
   if (fetchKeysOnly) {
     fetchQuery = fetchQuery.select('__key__');
   }
 
-  let [countQuery] = convertPayloadToFirestoreQuery(datastoreRequest, collectionName, collectionConfig, payloadQuery, []);
+  let [countQuery] = convertPayloadToFirestoreQuery(datastoreRequest, collectionName, collectionConfig, payloadQuery, [], locale);
   countQuery = countQuery.select('__key__');
   countQuery.orders = [];
 
@@ -44,7 +44,7 @@ export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
   if (fetchData) {
     let [rawDocs, runQueryInfo] = await fetchQuery.run();
 
-    rawDocs = rawDocs.filter(rawDoc => applyPayloadFilter(rawDoc, payloadQuery));
+    rawDocs = rawDocs.filter(rawDoc => applyPayloadFilter(rawDoc, payloadQuery, collectionConfig.flattenedFields, locale));
 
     if (fetchKeysOnly) {
       for (let doc of rawDocs) {
