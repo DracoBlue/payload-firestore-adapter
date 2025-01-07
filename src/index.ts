@@ -708,10 +708,7 @@ export function firestoreAdapter({
         try {
           let transaction = (this.firestore as Datastore).transaction();
           let transactionID = uuid();
-          console.log('create transaction', transactionID);
-
-          await transaction.run();
-  
+          console.log('create transaction', transactionID);           
           this.sessions[transactionID] = transaction;
           return transactionID
         } catch (error) {
