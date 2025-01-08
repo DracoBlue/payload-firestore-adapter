@@ -34,13 +34,13 @@ function transformToMingoQuery(query: Record<string, any>, flattenedFields : Fla
       result[key] = { $ne: condition.not_equals };
       // FIXME: handle non-date values
     } else if (condition.greater_than !== undefined) {
-      result[key] = { $gt: new Date(condition.greater_than) };
+      result[key] = { $gt: fieldConfig.type === "date" ? new Date(condition.greater_than) : condition.greater_than };
     } else if (condition.greater_than_equal !== undefined) {
-      result[key] = { $gte: new Date(condition.greater_than_equal) };
+      result[key] = { $gte: fieldConfig.type === "date" ? new Date(condition.greater_than_equal) : condition.greater_than_equal };
     } else if (condition.less_than !== undefined) {
-      result[key] = { $lt: new Date(condition.less_than) };
+      result[key] = { $lt: fieldConfig.type === "date" ? new Date(condition.less_than) : condition.less_than};
     } else if (condition.less_than_equal !== undefined) {
-      result[key] = { $lte: new Date(condition.less_than_equal) };
+      result[key] = { $lte: fieldConfig.type === "date" ? new Date(condition.less_than_equal) : condition.less_than_equal};
     }
 
     // Array Operators
@@ -53,9 +53,9 @@ function transformToMingoQuery(query: Record<string, any>, flattenedFields : Fla
     }
 
     // Existence Operators
-    else if (condition.exists === true) {
+    else if (condition.exists === true || condition.exists === "true") {
       result[key] = { $exists: true };
-    } else if (condition.exists === false) {
+    } else if (condition.exists === false || condition.exists === "false") {
       result[key] = { $exists: false };
     }
 
@@ -71,7 +71,7 @@ function transformToMingoQuery(query: Record<string, any>, flattenedFields : Fla
 
     // Range Operators
     else if (condition.between !== undefined && Array.isArray(condition.between) && condition.between.length === 2) {
-      result[key] = { $gte: condition.between[0], $lte: condition.between[1] };
+      result[key] = { $gte: fieldConfig.type === "date" ? new Date(condition.between[0]) : condition.between[0], $lte: fieldConfig.type === "date" ? new Date(condition.between[1]) : condition.between[1] };
     }
   }
 

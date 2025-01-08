@@ -362,7 +362,7 @@ describe('firestore adapter tests', () => {
           in: [withTagsOneAndFive.id, withTagTwo.id]
         }
       },
-      limit: 0
+      limit: 10
     })
 
     expect(inBothDocs).toHaveLength(2);
@@ -378,7 +378,7 @@ describe('firestore adapter tests', () => {
           in: [withTagsOneAndFive.id, withTagTwo.id]
         }
       },
-      limit: 0
+      limit: 10
     })
 
     expect(inOneDocs).toHaveLength(1);
@@ -395,7 +395,7 @@ describe('firestore adapter tests', () => {
           in: [withTagsOneAndFive.id, withTagTwo.id]
         }
       },
-      limit: 0
+      limit: 10
     })
 
     expect(inNoneOfThoseDocs).toHaveLength(0);
@@ -832,6 +832,7 @@ it('should query non-hasMany within an group', async () => {
   expect(resContainsSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
   expect(resContainsSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
 
+  expect(resContainsSecond.docs.length).toBe(1)
   expect(resContainsSecond.totalDocs).toBe(1)
 
   const resInSecond = await payload.find({

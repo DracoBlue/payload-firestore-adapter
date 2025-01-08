@@ -22,41 +22,49 @@ export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
   let [countQuery] = convertPayloadToFirestoreQuery(datastoreRequest, collectionName, collectionConfig, payloadQuery, [], locale);
   countQuery = countQuery.select('__key__');
   countQuery.orders = [];
+  let totalDocsCount = hasNodeConditions ? 0 : (await countQuery.run())[0].length;
 
   let offset = (skip || 0) + (page || 1 > 1 ? (payloadLimit || 0) * ((page || 1) - 1) : 0)
 
-  if (payloadLimit) {
-    fetchQuery = fetchQuery.limit(payloadLimit);
+  if (!hasNodeConditions) {
+    if (payloadLimit) {
+      fetchQuery = fetchQuery.limit(payloadLimit);
+    }
+    if (offset > 0) {
+      fetchQuery = fetchQuery.offset(offset);
+    }
   }
-  if (offset > 0) {
-    fetchQuery = fetchQuery.offset(offset);
+
+  let docs = []
+
+  if (fetchData || hasNodeConditions) {
+    let [rawDocs, runQueryInfo] = await fetchQuery.run();
+
+    rawDocs = rawDocs.filter(rawDoc => applyPayloadFilter(rawDoc, payloadQuery, collectionConfig.flattenedFields, locale));
+    totalDocsCount = rawDocs.length;
+
+    rawDocs = payloadLimit < 1 ? rawDocs.slice(offset) : rawDocs.slice(offset, payloadLimit);
+
+    if (fetchData) {
+      if (fetchKeysOnly) {
+        for (let doc of rawDocs) {
+          docs.push({ key: doc[datastoreRequest.KEY] });
+        }
+      } else {
+        for (let doc of rawDocs) {
+          doc = { id: doc[datastoreRequest.KEY]?.name, ...doc };
+          docs.push(doc as T)
+        }
+      }
+    }
   }
 
   let { totalPages, nextPage, prevPage, pagingCounter, hasNextPage, hasPrevPage, totalDocs } = countData ? (calculatePageResultStatistics({
-    totalDocsCount: (await countQuery.run())[0].length,
+    totalDocsCount,
     payloadLimit: payloadLimit ? payloadLimit : 0,
     page: page || 1,
     pagination: pagination || false,
   })) : { totalPages: 0, totalDocs: 0, nextPage: null, prevPage: null, pagingCounter: null, hasNextPage: null, hasPrevPage: null};
-
-  let docs = []
-
-  if (fetchData) {
-    let [rawDocs, runQueryInfo] = await fetchQuery.run();
-
-    rawDocs = rawDocs.filter(rawDoc => applyPayloadFilter(rawDoc, payloadQuery, collectionConfig.flattenedFields, locale));
-
-    if (fetchKeysOnly) {
-      for (let doc of rawDocs) {
-        docs.push({ key: doc[datastoreRequest.KEY] });
-      }
-    } else {
-      for (let doc of rawDocs) {
-        doc = { id: doc[datastoreRequest.KEY]?.name, ...doc };
-        docs.push(doc as T)
-      }
-    }
-  }
 
   return {
     docs,
