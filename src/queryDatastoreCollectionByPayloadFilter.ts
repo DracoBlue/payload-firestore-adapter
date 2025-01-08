@@ -43,7 +43,7 @@ export const queryDatastoreCollectionByPayloadFilter = async <T = TypeWithID>({
     rawDocs = rawDocs.filter(rawDoc => applyPayloadFilter(rawDoc, payloadQuery, collectionConfig.flattenedFields, locale));
     totalDocsCount = rawDocs.length;
 
-    rawDocs = rawDocs.slice(offset, payloadLimit);
+    rawDocs = payloadLimit < 1 ? rawDocs.slice(offset) : rawDocs.slice(offset, payloadLimit);
 
     if (fetchData) {
       if (fetchKeysOnly) {
