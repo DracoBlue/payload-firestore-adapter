@@ -87,13 +87,23 @@ describe('applyPayloadFilter', () => {
     test('Matches less_than condition', () => {
       const entity = { timestamp: new Date("2024-12-31T23:59:59Z") };
       const query = { timestamp: { less_than: "2025-01-01T00:00:00Z" } };
-      expect(applyPayloadFilter(entity, query, [])).toBe(true);
+      expect(applyPayloadFilter(entity, query, [
+        {
+          name: "timestamp",
+          type: "date"
+        }
+      ])).toBe(true);
     });
 
     test('Rejects non-matching less_than condition', () => {
       const entity = { timestamp: new Date("2025-01-02T00:00:00Z") };
       const query = { timestamp: { less_than: "2025-01-01T00:00:00Z" } };
-      expect(applyPayloadFilter(entity, query, [])).toBe(false);
+      expect(applyPayloadFilter(entity, query, [
+        {
+          name: "timestamp",
+          type: "date"
+        }
+      ])).toBe(false);
     });
   });
 
@@ -205,7 +215,12 @@ describe('applyPayloadFilter', () => {
         }
       ]
     };
-    expect(applyPayloadFilter(entity, query, [])).toBe(true);
+    expect(applyPayloadFilter(entity, query, [
+      {
+        name: "timestamp",
+        type: "date"
+      }
+    ])).toBe(true);
   });
 
   test('Handles complex or conditions', () => {
