@@ -36,7 +36,7 @@ function transformToMingoQuery(query: Record<string, any>, flattenedFields : Fla
     } else if (condition.greater_than !== undefined) {
       result[key] = { $gt: fieldConfig.type === "date" ? new Date(condition.greater_than) : condition.greater_than };
     } else if (condition.greater_than_equal !== undefined) {
-      result[key] = { $gte: fieldConfig.type === "date" ? new Date(condition.greater_than_equal : condition.greater_than_equal) };
+      result[key] = { $gte: fieldConfig.type === "date" ? new Date(condition.greater_than_equal) : condition.greater_than_equal) };
     } else if (condition.less_than !== undefined) {
       result[key] = { $lt: fieldConfig.type === "date" ? new Date(condition.less_than) : condition.less_than};
     } else if (condition.less_than_equal !== undefined) {
