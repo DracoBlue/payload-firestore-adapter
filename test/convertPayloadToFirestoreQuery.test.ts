@@ -1,7 +1,7 @@
 import { Datastore, or, and, PropertyFilter, Query } from '@google-cloud/datastore';
 import { generateQueryJson } from "./../src/firestoreQueryJsonConverter";
 import { convertPayloadToFirestoreQuery } from "./../src/convertPayloadToFirestoreQuery";
-import { Field, SanitizedCollectionConfig, Where } from "payload";
+import { FlattenedField, SanitizedCollectionConfig, Where } from "payload";
 
 const datastore = new Datastore({
     projectId: 'example',
@@ -9,16 +9,16 @@ const datastore = new Datastore({
 
 const collectionName = "testcollection";
 const sanitizedCollectionConfig = {
-    fields: [
+    flattenedFields: [
         {
             name: "id",
             type: "text",
-        } as Field,
+        } as FlattenedField,
         {
             name: "tags",
             type: "text",
             hasMany: true
-        } as Field,
+        } as FlattenedField,
     ],
     auth: {},
     endpoints: [],

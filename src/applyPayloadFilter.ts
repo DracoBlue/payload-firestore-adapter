@@ -1,23 +1,30 @@
 import { Query } from "mingo";
+import { getFieldConfigByName } from "./getfieldNameConfig";
+import { Field, FlattenedField, SanitizedCollectionConfig } from "payload";
 
-export const applyPayloadFilter = (entity, query) => {
-  const mingoQuery = transformToMingoQuery(query);
+export const applyPayloadFilter = (entity, query: Record<string, any>, flattenedFields : FlattenedField[], locale? : string) => {
+  const mingoQuery = transformToMingoQuery(query, flattenedFields, locale);
   const mingo = new Query(mingoQuery);
   return mingo.test(entity);
 }
 
 
-function transformToMingoQuery(query) {
+function transformToMingoQuery(query: Record<string, any>, flattenedFields : FlattenedField[], locale? : string) {
   const result = {};
 
-  for (const key in query) {
-    const condition = query[key];
+  for (const originalKey in query) {
+    const condition = query[originalKey];
+    let fieldConfig = getFieldConfigByName(originalKey, flattenedFields);
+    let key = originalKey;
+    if (fieldConfig.localized && locale) {
+      key = originalKey + '.' + locale;
+    }
 
     // Logical Operators
     if (key === 'and') {
-      result['$and'] = condition.map(transformToMingoQuery);
+      result['$and'] = condition.map((subCondition) => transformToMingoQuery(subCondition, flattenedFields, locale));
     } else if (key === 'or') {
-      result['$or'] = condition.map(transformToMingoQuery);
+      result['$or'] = condition.map((subCondition) => transformToMingoQuery(subCondition, flattenedFields, locale));
     }
 
     // Comparison Operators

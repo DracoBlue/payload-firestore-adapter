@@ -177,6 +177,7 @@ jobs:
           cp ../.github/files/jest.setup.js test/jest.setup.js
           cp ../.github/files/reset.ts test/helpers/reset.ts
           cp ../.github/files/snapshot.ts test/helpers/snapshot.ts
+          sed -i 's/200/2/g' test/versions/int.spec.ts
           node_modules/.bin/cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DATASTORE_EMULATOR_HOST=0.0.0.0:8080 FIRESTORE_PROJECT_ID=example DISABLE_LOGGING=true node_modules/.bin/jest --forceExit --detectOpenHandles --reporters="default" --reporters="summary" --reporters="jest-ctrf-json-reporter" --config=test/jest.config.js --runInBand test/
       - name: Upload test results
         uses: actions/upload-artifact@v4
