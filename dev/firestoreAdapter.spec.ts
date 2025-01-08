@@ -362,7 +362,7 @@ describe('firestore adapter tests', () => {
           in: [withTagsOneAndFive.id, withTagTwo.id]
         }
       },
-      limit: 0
+      limit: 10
     })
 
     expect(inBothDocs).toHaveLength(2);
@@ -378,7 +378,7 @@ describe('firestore adapter tests', () => {
           in: [withTagsOneAndFive.id, withTagTwo.id]
         }
       },
-      limit: 0
+      limit: 10
     })
 
     expect(inOneDocs).toHaveLength(1);
@@ -395,7 +395,7 @@ describe('firestore adapter tests', () => {
           in: [withTagsOneAndFive.id, withTagTwo.id]
         }
       },
-      limit: 0
+      limit: 10
     })
 
     expect(inNoneOfThoseDocs).toHaveLength(0);
