@@ -53,9 +53,9 @@ function transformToMingoQuery(query: Record<string, any>, flattenedFields : Fla
     }
 
     // Existence Operators
-    else if (condition.exists === true) {
+    else if (condition.exists === true || condition.exists === "true") {
       result[key] = { $exists: true };
-    } else if (condition.exists === false) {
+    } else if (condition.exists === false || condition.exists === "false") {
       result[key] = { $exists: false };
     }
 
