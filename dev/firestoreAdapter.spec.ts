@@ -832,6 +832,7 @@ it('should query non-hasMany within an group', async () => {
   expect(resContainsSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
   expect(resContainsSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
 
+  expect(resContainsSecond.docs.length).toBe(1)
   expect(resContainsSecond.totalDocs).toBe(1)
 
   const resInSecond = await payload.find({
