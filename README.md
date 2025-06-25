@@ -2,6 +2,8 @@
 
 This is an unofficial and completely experimental and not at all finished firestore database adapter for payload cms 3.0 beta.
 
+> There is another way: If you "just" want to use a firestore database (because it has a nice free tier on google cloud), please checkout the mongodb compatiblity layer in firestore and use the default mongodb connector. <https://cloud.google.com/firestore/mongodb-compatibility/docs/create-and-query-database>
+
 ## Testing the alpha
 
 > Caution: **It's not fully working (only 70% of the official payload integration tests pass). It uses the firestore emulator in datastore mode. Do not use it!**
